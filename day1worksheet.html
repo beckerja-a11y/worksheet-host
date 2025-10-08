@@ -1,4 +1,4 @@
-<!-- NOTE: This is the code from history that links back to the index page. -->
+<!-- NOTE: This is the updated code for Day 1 Worksheet with Text-to-Speech (TTS) feature. -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -24,6 +24,19 @@
         .drop-target.dropped { border-color: #10b981 !important; background-color: #d1fae5; }
         .feedback { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); padding: 20px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); z-index: 1000; }
         #drawingCanvas { width: 100%; height: 250px; }
+        
+        /* Custom arrow and spinner animation for TTS */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.9); }
+        }
+        #ttsButton {
+            animation: pulse 1.5s infinite;
+        }
+        #ttsDirection {
+            transform: translateX(-15px); /* Move direction box slightly away from button */
+            font-size: 0.8rem;
+        }
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -36,14 +49,38 @@
     <main class="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-2xl">
 
         <section class="mb-8 border-b-4 border-red-200 pb-4">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">Reading: The Declaration and My Freedoms</h2>
-            <div class="space-y-4 text-lg text-gray-700 leading-relaxed">
-                <p>Long ago, we wrote a special paper called the **Declaration of Independence**. This paper was important because it said we wanted to be **free** from a big King's rules. This paper is the "Go-Free" Paper!</p>
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-2xl font-bold text-gray-800">Reading: The Declaration and My Freedoms</h2>
+                <div class="flex items-center space-x-2 relative">
+                    <!-- ARROW & Directions -->
+                    <div id="ttsDirection" class="absolute right-full top-1/2 transform -translate-y-1/2 mr-3 p-2 bg-indigo-500 text-white text-xs font-semibold rounded-lg shadow-lg hidden sm:block">
+                        Click to Read Aloud!
+                        <!-- Arrow pointing to the button -->
+                        <svg class="w-4 h-4 absolute top-1/2 -right-3 transform -translate-y-1/2 rotate-90 text-indigo-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 20l10-10L10 0l-10 10z"></path></svg>
+                    </div>
+
+                    <button id="ttsButton" class="p-3 bg-red-600 text-white rounded-full shadow-lg hover:bg-red-700 transition duration-200 flex items-center justify-center disabled:opacity-50" title="Read Text Aloud">
+                         <!-- Speaker Icon (lucide-react volume-2 equivalent) -->
+                         <svg id="speakerIcon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a.5.5 0 01-.176.708l-5.32 3.547a.5.5 0 01-.796-.407V8.5a.5.5 0 01.796-.407l5.32-3.547a.5.5 0 01.708.176v6.86a.5.5 0 01-.176.708zM18 11a7 7 0 00-7-7"></path></svg>
+                         <!-- Loading Spinner -->
+                         <svg id="loadingSpinner" class="w-6 h-6 animate-spin hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" xmlns="http://www.w3.org/2000/svg"><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    </button>
+                </div>
+            </div>
+            
+            <div id="readingText" class="space-y-4 text-lg text-gray-700 leading-relaxed">
+                <p>Welcome to your first lesson on Civics! To start our unit, we are looking at the most important sentence in American history, found in a document called the **Declaration of Independence**. This document, which we nicknamed the **"Go-Free" Paper**, was written a long time ago when the people living here decided they wanted to be **free** from the control of a king and start their own country.</p>
                 <p class="p-3 bg-red-50 rounded-lg border-l-4 border-red-500 font-semibold">
-                    The paper says that every person is born with special gifts. These are gifts from nature, not from a government. We call these gifts **My Freedoms** (or Natural Rights).
+                    The Declaration of Independence makes a grand statement: all people are born with rights that the government cannot take away. These rights are not gifts from a government or a ruler; they are **Natural Rights**—your most basic, most powerful gifts from nature. We call them **My Freedoms**.
                 </p>
                 <p>
-                    What are **My Freedoms**? They are the right to **Live**, the right to be **Free**, and the right to feel **Happy**. No boss can take these basic freedoms away!
+                    The three main Natural Rights mentioned in the Declaration are:
+                    <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+                        <li>The right to **Life** (the right to be safe and protected).</li>
+                        <li>The right to **Liberty** (the right to make your own choices and be free).</li>
+                        <li>The pursuit of **Happiness** (the right to set goals and chase your dreams).</li>
+                    </ul>
+                    These three ideas are the foundation of all American law!
                 </p>
             </div>
         </section>
@@ -376,6 +413,193 @@
                 feedbackBox.style.display = 'none';
             }, 1500);
         }
+        
+        // --- New TTS Functionality ---
+        const ttsButton = document.getElementById('ttsButton');
+        const readingTextDiv = document.getElementById('readingText');
+        const speakerIcon = document.getElementById('speakerIcon');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const ttsDirection = document.getElementById('ttsDirection');
+
+        // Helper function to convert base64 to ArrayBuffer
+        function base64ToArrayBuffer(base64) {
+            const binaryString = atob(base64);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
+
+        // Helper function to create WAV blob from PCM data (signed 16-bit PCM)
+        function pcmToWav(pcm16, sampleRate) {
+            const buffer = new ArrayBuffer(44 + pcm16.length * 2);
+            const view = new DataView(buffer);
+            
+            // RIFF identifier 'RIFF'
+            writeString(view, 0, 'RIFF');
+            // file length (excluding RIFF identifier and length field)
+            view.setUint32(4, 36 + pcm16.length * 2, true);
+            // RIFF type 'WAVE'
+            writeString(view, 8, 'WAVE');
+            // format chunk identifier 'fmt '
+            writeString(view, 12, 'fmt ');
+            // format chunk length
+            view.setUint32(16, 16, true);
+            // sample format (1 = PCM)
+            view.setUint16(20, 1, true);
+            // channel count
+            view.setUint16(22, 1, true);
+            // sample rate
+            view.setUint32(24, sampleRate, true);
+            // byte rate (SampleRate * Channels * BitsPerSample / 8)
+            view.setUint32(28, sampleRate * 1 * 2, true);
+            // block align (Channels * BitsPerSample / 8)
+            view.setUint16(32, 1 * 2, true);
+            // bits per sample
+            view.setUint16(34, 16, true);
+            // data chunk identifier 'data'
+            writeString(view, 36, 'data');
+            // data chunk length
+            view.setUint32(40, pcm16.length * 2, true);
+            
+            // write PCM data
+            let offset = 44;
+            for (let i = 0; i < pcm16.length; i++) {
+                view.setInt16(offset, pcm16[i], true);
+                offset += 2;
+            }
+
+            return new Blob([buffer], { type: 'audio/wav' });
+        }
+
+        function writeString(view, offset, string) {
+            for (let i = 0; i < string.length; i++) {
+                view.setUint8(offset + i, string.charCodeAt(i));
+            }
+        }
+
+        async function speakText(text) {
+            ttsButton.disabled = true;
+            speakerIcon.classList.add('hidden');
+            loadingSpinner.classList.remove('hidden');
+
+            const payload = {
+                contents: [{
+                    parts: [{ text: text }]
+                }],
+                generationConfig: {
+                    responseModalities: ["AUDIO"],
+                    speechConfig: {
+                        // Using the Kore voice for a firm, clear tone
+                        voiceConfig: {
+                            prebuiltVoiceConfig: { voiceName: "Kore" } 
+                        }
+                    }
+                },
+                model: "gemini-2.5-flash-preview-tts"
+            };
+
+            const apiKey = ""; 
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+
+            const maxRetries = 3;
+            let response;
+            
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (response.ok) break;
+
+                } catch (error) {
+                    console.error('Fetch error:', error);
+                }
+
+                if (i < maxRetries - 1) {
+                    const delay = Math.pow(2, i) * 1000;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                }
+            }
+
+            if (!response || !response.ok) {
+                showFeedback('Error: Could not generate speech.', 'bg-red-500');
+                ttsButton.disabled = false;
+                speakerIcon.classList.remove('hidden');
+                loadingSpinner.classList.add('hidden');
+                return;
+            }
+
+            const result = await response.json();
+            const part = result?.candidates?.[0]?.content?.parts?.[0];
+            const audioData = part?.inlineData?.data;
+            const mimeType = part?.inlineData?.mimeType;
+
+            if (audioData && mimeType && mimeType.startsWith("audio/L16")) {
+                const sampleRateMatch = mimeType.match(/rate=(\d+)/);
+                const sampleRate = sampleRateMatch ? parseInt(sampleRateMatch[1], 10) : 24000;
+                
+                const pcmData = base64ToArrayBuffer(audioData);
+                const pcm16 = new Int16Array(pcmData);
+                
+                const wavBlob = pcmToWav(pcm16, sampleRate);
+                const audioUrl = URL.createObjectURL(wavBlob);
+                
+                const audio = new Audio(audioUrl);
+                audio.play();
+
+                audio.onended = () => {
+                    ttsButton.disabled = false;
+                    speakerIcon.classList.remove('hidden');
+                    loadingSpinner.classList.add('hidden');
+                    // Revoke the Blob URL when playback is finished to free up memory
+                    URL.revokeObjectURL(audioUrl); 
+                };
+
+                showFeedback('Reading aloud...', 'bg-indigo-500');
+
+            } else {
+                showFeedback('Failed to process audio data.', 'bg-red-500');
+            }
+            
+            // Ensure button and spinner state is reset in case of error
+            ttsButton.disabled = false;
+            speakerIcon.classList.remove('hidden');
+            loadingSpinner.classList.add('hidden');
+        }
+
+        // Event listener for the TTS button
+        ttsButton.addEventListener('click', () => {
+            // Hide the arrow immediately on click
+            if (ttsDirection) {
+                ttsDirection.classList.add('hidden');
+            }
+            
+            // Get all visible text content from the reading section, cleaning up whitespace
+            const textToSpeak = readingTextDiv.innerText.trim().replace(/\s+/g, ' '); 
+            if (textToSpeak) {
+                speakText(textToSpeak);
+            }
+        });
+        
+        // Hide the directions arrow after a short delay for non-click users
+        window.onload = function() {
+            resizeCanvas(); // Ensure canvas is resized on load
+            if (ttsDirection) {
+                // Show arrow for 5 seconds to draw attention
+                ttsDirection.classList.remove('hidden'); 
+                setTimeout(() => {
+                    ttsDirection.classList.add('hidden');
+                }, 5000); 
+            }
+        };
+
     </script>
 </body>
 </html>
