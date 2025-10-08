@@ -13,7 +13,6 @@
         }
         .lesson-card {
             transition: all 0.3s ease-in-out;
-            cursor: pointer;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             border: 2px solid transparent;
             text-decoration: none; /* Remove underline from link */
@@ -23,80 +22,163 @@
             box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
         }
         .active-card {
+            cursor: pointer;
             border-color: #10b981; /* Green border for the active day */
             background-color: #d1fae5;
+        }
+        .active-card:hover {
+            border-color: #059669;
+        }
+        .locked-card {
+            cursor: not-allowed;
+            background-color: #f3f4f6;
+            opacity: 0.7;
+            filter: grayscale(0.5);
         }
     </style>
 </head>
 <body class="p-4 md:p-10">
 
-    <div class="max-w-5xl mx-auto bg-white p-6 md:p-10 rounded-3xl shadow-2xl">
-
-        <header class="text-center mb-12">
-            <h1 class="text-5xl font-extrabold text-indigo-700 mb-2">We the People: Civics Unit</h1>
-            <p class="text-xl text-gray-600">Explore the foundational documents of the United States.</p>
-            <div class="h-1 w-24 bg-red-500 mx-auto mt-4 rounded-full"></div>
+    <div class="max-w-6xl mx-auto">
+        <header class="text-center mb-12 bg-white p-6 rounded-xl shadow-lg border-b-4 border-blue-500">
+            <h1 class="text-5xl font-extrabold text-blue-700 mb-2">We the People</h1>
+            <p class="text-xl text-gray-600">Learning the Founding Documents of the United States</p>
         </header>
 
-        <section class="mb-10">
-            <h2 class="text-3xl font-bold text-gray-800 mb-6">Unit Progress</h2>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
-
-                <!-- Day 1: Active Lesson Link -->
-                <a href="day1worksheet.html" class="lesson-card active-card block p-6 rounded-xl bg-green-50 hover:bg-green-100">
-                    <div class="text-sm font-semibold text-green-700 mb-1">DAY 1 - Active</div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-3">My Freedoms</h3>
-                    <p class="text-gray-600 text-sm">The Declaration of Independence & Natural Rights (Life, Liberty, Happiness).</p>
-                    <div class="mt-4 text-right text-green-600 font-semibold flex items-center justify-end">
-                        Start <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                    </div>
-                </a>
-
-                <!-- Day 2: Placeholder -->
-                <div class="lesson-card p-6 rounded-xl bg-gray-100 hover:bg-gray-200" onclick="alert('Day 2 materials are coming soon!')">
-                    <div class="text-sm font-semibold text-gray-500 mb-1">DAY 2 - Next</div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-3">Fixing the Problems</h3>
-                    <p class="text-gray-600 text-sm">Learning about the Articles of Confederation and why we needed a Constitution.</p>
-                    <div class="mt-4 text-right text-gray-500 font-semibold flex items-center justify-end">
-                        Locked <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-                    </div>
+        <section id="lessonGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            
+            <!-- Day 1: Declaration of Independence (Completed/Active) -->
+            <a href="day1worksheet.html" class="lesson-card p-6 rounded-xl border-blue-500 bg-blue-50 active-card" id="day1Card">
+                <div class="text-sm font-semibold text-blue-500 mb-1">DAY 1</div>
+                <h3 class="text-xl font-bold text-gray-900 mb-3">My Freedoms</h3>
+                <p class="text-gray-600 text-sm">Identifying Natural Rights and the role of the Declaration of Independence.</p>
+                <div id="day1Status" class="mt-4 text-right font-bold flex items-center justify-end text-green-600">
+                    Active
                 </div>
+            </a>
 
-                <!-- Day 3: Placeholder -->
-                <div class="lesson-card p-6 rounded-xl bg-gray-100 hover:bg-gray-200" onclick="alert('Day 3 materials are coming soon!')">
-                    <div class="text-sm font-semibold text-gray-500 mb-1">DAY 3</div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-3">Three Big Jobs</h3>
-                    <p class="text-gray-600 text-sm">Exploring the three branches of government: Legislative, Executive, and Judicial.</p>
-                    <div class="mt-4 text-right text-gray-500 font-semibold flex items-center justify-end">
-                        Locked <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-                    </div>
+            <!-- Day 2: Constitution (Locked by default, Unlocks after Day 1) -->
+            <div id="day2Card" class="lesson-card p-6 rounded-xl locked-card">
+                <div class="text-sm font-semibold text-gray-500 mb-1">DAY 2</div>
+                <h3 class="text-xl font-bold text-gray-900 mb-3">The Blueprint for the USA</h3>
+                <p class="text-gray-600 text-sm">Learning the main parts of the U.S. Constitution (The Framework).</p>
+                <div id="day2Status" class="mt-4 text-right text-gray-500 font-semibold flex items-center justify-end">
+                    Locked <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                 </div>
-
-                <!-- Day 4: Placeholder -->
-                <div class="lesson-card p-6 rounded-xl bg-gray-100 hover:bg-gray-200" onclick="alert('Day 4 materials are coming soon!')">
-                    <div class="text-sm font-semibold text-gray-500 mb-1">DAY 4</div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-3">Power Checks</h3>
-                    <p class="text-gray-600 text-sm">Understanding Checks and Balances: how each branch keeps the others fair.</p>
-                    <div class="mt-4 text-right text-gray-500 font-semibold flex items-center justify-end">
-                        Locked <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-                    </div>
-                </div>
-
-                <!-- Day 5: Placeholder -->
-                <div class="lesson-card p-6 rounded-xl bg-gray-100 hover:bg-gray-200" onclick="alert('Day 5 materials are coming soon!')">
-                    <div class="text-sm font-semibold text-gray-500 mb-1">DAY 5</div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-3">My Bill of Rights</h3>
-                    <p class="text-gray-600 text-sm">Putting your Natural Rights card to use and learning the first 10 Amendments.</p>
-                    <div class="mt-4 text-right text-gray-500 font-semibold flex items-center justify-end">
-                        Locked <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-                    </div>
-                </div>
-
             </div>
-        </section>
 
+            <!-- Day 3: Placeholder (Locked) -->
+            <div id="day3Card" class="lesson-card p-6 rounded-xl locked-card">
+                <div class="text-sm font-semibold text-gray-500 mb-1">DAY 3</div>
+                <h3 class="text-xl font-bold text-gray-900 mb-3">The Preamble Puzzle</h3>
+                <p class="text-gray-600 text-sm">Unpacking "We the People" and the 6 goals of the Constitution.</p>
+                <div class="mt-4 text-right text-gray-500 font-semibold flex items-center justify-end">
+                    Locked <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                </div>
+            </div>
+
+            <!-- Day 4: Placeholder (Locked) -->
+            <div id="day4Card" class="lesson-card p-6 rounded-xl locked-card">
+                <div class="text-sm font-semibold text-gray-500 mb-1">DAY 4</div>
+                <h3 class="text-xl font-bold text-gray-900 mb-3">The People's Power</h3>
+                <p class="text-gray-600 text-sm">How the government gets its power from the citizens.</p>
+                <div class="mt-4 text-right text-gray-500 font-semibold flex items-center justify-end">
+                    Locked <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                </div>
+            </div>
+
+            <!-- Day 5: Placeholder (Locked) -->
+            <div id="day5Card" class="lesson-card p-6 rounded-xl locked-card">
+                <div class="text-sm font-semibold text-gray-500 mb-1">DAY 5</div>
+                <h3 class="text-xl font-bold text-gray-900 mb-3">My Bill of Rights</h3>
+                <p class="text-gray-600 text-sm">Putting your Natural Rights card to use and learning the first 10 Amendments.</p>
+                <div class="mt-4 text-right text-gray-500 font-semibold flex items-center justify-end">
+                    Locked <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                </div>
+            </div>
+            
+        </section>
+        
+        <!-- Completion Message (Initially hidden) -->
+        <div id="completionMessage" class="hidden mt-12 p-8 bg-green-100 border-4 border-green-500 rounded-xl text-center">
+            <h2 class="text-3xl font-extrabold text-green-700">Congratulations!</h2>
+            <p class="text-lg text-gray-700 mt-2">You have completed Day 1: My Freedoms. You can now start Day 2!</p>
+            <a href="day2worksheet.html" id="startDay2Button" class="inline-block mt-4 px-6 py-3 bg-green-600 text-white font-bold rounded-lg shadow-md hover:bg-green-700 transition">
+                Start Day 2: The Blueprint for the USA
+            </a>
+        </div>
+        
     </div>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const day1Card = document.getElementById('day1Card');
+            const day1Status = document.getElementById('day1Status');
+            const day2Card = document.getElementById('day2Card');
+            const day2Status = document.getElementById('day2Status');
+            const completionMessage = document.getElementById('completionMessage');
+
+            // --- Check Completion Status ---
+            const isDay1Completed = localStorage.getItem('day1_completed') === 'true';
+
+            if (isDay1Completed) {
+                // 1. Update Day 1 Status
+                day1Card.classList.remove('active-card', 'bg-blue-50');
+                day1Card.classList.add('bg-green-100', 'border-green-500');
+                day1Status.textContent = 'Completed!';
+                day1Status.classList.remove('text-green-600');
+                day1Status.classList.add('text-green-700');
+                
+                // Remove the link so it just serves as a status card
+                day1Card.removeAttribute('href');
+                day1Card.style.cursor = 'default';
+                day1Card.classList.remove('lesson-card:hover'); // Stop hover effect when completed
+
+                // 2. Unlock Day 2
+                unlockDay(day2Card, day2Status, 'day2worksheet.html', 'Active');
+                
+                // 3. Show Completion Message
+                completionMessage.classList.remove('hidden');
+
+            } else {
+                // Ensure Day 2 is locked if Day 1 is not complete
+                day2Card.classList.add('locked-card');
+            }
+
+            // --- Helper to Unlock Future Days ---
+            function unlockDay(cardElement, statusElement, href, statusText) {
+                // Remove locked classes/attributes
+                cardElement.classList.remove('locked-card');
+                cardElement.classList.add('active-card', 'bg-yellow-50');
+                
+                // Set the link
+                cardElement.setAttribute('href', href);
+                cardElement.style.cursor = 'pointer';
+                
+                // Update status text (removing the lock icon)
+                statusElement.innerHTML = `<span class="text-yellow-700">${statusText}</span>`;
+            }
+
+            // --- Click Handler for Locked Cards (Optional) ---
+            document.querySelectorAll('.locked-card').forEach(card => {
+                card.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (card.classList.contains('locked-card')) {
+                         // Use a custom message box instead of alert()
+                         const feedbackBox = document.createElement('div');
+                         feedbackBox.className = 'fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50 z-50';
+                         feedbackBox.innerHTML = `
+                            <div class="bg-white p-6 rounded-lg shadow-xl text-center">
+                                <p class="text-xl font-bold text-red-600 mb-4">Activity Locked!</p>
+                                <p class="text-gray-700">Please complete the previous day's activity first to unlock this lesson.</p>
+                                <button onclick="this.parentElement.parentElement.remove()" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg">Close</button>
+                            </div>
+                         `;
+                         document.body.appendChild(feedbackBox);
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>
