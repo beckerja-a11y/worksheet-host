@@ -6,45 +6,140 @@
   <title>Day 1: My Freedoms (Natural Rights)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
     :root{
       --primary-600: #2563eb; /* soft blue */
       --primary-400: #60a5fa;
       --accent-500: #f59e0b; /* warm yellow */
       --muted-100: #f8fafc;
-      --card-border: rgba(37,99,235,0.12);
     }
     body{
       font-family: 'Inter', sans-serif;
       background-color: var(--muted-100);
     }
-    .concept-card { cursor: grab; transition: transform 0.18s, box-shadow 0.18s; border: 4px solid rgba(245,158,11,0.08); }
-    .concept-card:active { cursor: grabbing; box-shadow: 0 10px 20px rgba(99,102,241,0.12); transform: scale(1.03); }
-    .freedom-option { transition: all 0.16s; cursor: pointer; box-shadow: 0 2px 6px rgba(2,6,23,0.06); }
-    .freedom-option:hover { transform: scale(1.03); box-shadow: 0 6px 14px rgba(2,6,23,0.08); }
-    .selected { border: 4px solid #10b981; background-color: #d1fae5; }
-    .drag-item { cursor: grab; transition: opacity 0.12s; min-width: 100px; }
+    /* --- General Drag & Drop Styles --- */
+    .drag-item-idea {
+        cursor: grab;
+        transition: transform 0.18s, box-shadow 0.18s;
+        border: 2px solid var(--primary-400);
+        background-color: #eef2ff; /* Light blue background for ideas */
+        min-height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        text-align: center;
+    }
+    .drag-item-idea:active {
+        cursor: grabbing;
+        box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);
+        transform: scale(1.02);
+    }
+    .drag-item-idea.hidden-item {
+        display: none !important;
+    }
+    .drop-target-match {
+        background-color: #ffffff;
+        transition: background-color .12s, border-color .12s;
+        min-height: 100px;
+        border: 4px dashed #9ca3af; /* gray-400 */
+    }
+    .drop-target-match.drag-over {
+        background-color: #eff6ff;
+        border-color: var(--primary-600);
+    }
+    .drop-target-match.matched {
+        border-style: solid !important;
+        border-color: #10b981 !important; /* green-500 */
+        background-color: #d1fae5; /* green-100 */
+    }
+
+    /* Activity 2 */
+    .freedom-option {
+        transition: all 0.16s;
+        cursor: pointer;
+        box-shadow: 0 2px 6px rgba(2,6,23,0.06);
+        border: 2px solid transparent;
+    }
+    .freedom-option:hover {
+        transform: scale(1.03);
+        box-shadow: 0 6px 14px rgba(2,6,23,0.08);
+    }
+    .selected {
+        border: 4px solid #10b981;
+        background-color: #d1fae5;
+        transform: scale(1.03);
+    }
+
+    /* Activity 3 */
+    .drag-item {
+        cursor: grab;
+        transition: opacity 0.12s;
+        min-width: 100px;
+        font-weight: 700;
+        text-align: center;
+    }
     .drag-item.dragging { opacity: 0.5; }
-    .drop-target { background-color: #ffffff; transition: background-color .12s, border-color .12s; min-height: 160px; }
-    .drop-target.drag-over { background-color: #eff6ff; border-color: var(--primary-600); }
-    .drop-target.dropped { border-color: #10b981 !important; background-color: #d1fae5; }
-    .feedback { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); padding: 16px 20px; border-radius: 10px; box-shadow: 0 12px 30px rgba(2,6,23,0.2); z-index: 1000; color: white; font-weight:700; }
-    .tooltip-inner { display:none; position:absolute; z-index: 50; width: 220px; background: white; border:1px solid rgba(2,6,23,0.06); padding:8px; border-radius:8px; box-shadow:0 8px 20px rgba(2,6,23,0.08); }
-    .glossary-term:hover .tooltip-inner, .glossary-term:focus-within .tooltip-inner { display:block; }
-    /* small helper for visually hidden text (screen readers) */
+    .drop-target.dropped {
+        border-style: solid !important;
+        background-color: #f0fdf4; /* green-50 */
+    }
+
+    /* General UI */
+    .feedback {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%,-50%);
+        padding: 16px 20px;
+        border-radius: 10px;
+        box-shadow: 0 12px 30px rgba(2,6,23,0.2);
+        z-index: 1000;
+        color: white;
+        font-weight:700;
+    }
+    .tooltip-inner {
+        display:none;
+        position:absolute;
+        z-index: 50;
+        width: 220px;
+        background: white;
+        border:1px solid rgba(2,6,23,0.06);
+        padding:8px;
+        border-radius:8px;
+        box-shadow:0 8px 20px rgba(2,6,23,0.08);
+    }
+    .glossary-term:hover .tooltip-inner, .glossary-term:focus-within .tooltip-inner {
+        display:block;
+        top: -10px;
+        left: 100%;
+        margin-left: 10px;
+        transform: translateY(-50%);
+    }
     .sr-only { position: absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
-    /* canvas fallback size */
     #drawingCanvas { width: 100%; height: 240px; }
   </style>
 </head>
 <body class="p-4 md:p-8 text-gray-800">
 
-  <header class="text-center mb-6">
+  <!-- Progress Tracker (Sticky) -->
+  <div id="progressTracker" class="sticky top-0 z-10 max-w-4xl mx-auto bg-white p-3 border-b shadow-lg rounded-b-xl">
+    <div class="flex justify-between items-center mb-1">
+        <span class="font-extrabold text-lg text-[color:var(--primary-600)]">Lesson Progress:</span>
+        <span id="progressText" class="text-sm font-semibold text-gray-700">0/4 Activities Done</span>
+    </div>
+    <div class="h-3 bg-gray-200 rounded-full overflow-hidden">
+        <div id="progressBar" class="h-full bg-green-500 rounded-full transition-all duration-500 ease-out" style="width: 0%;"></div>
+    </div>
+  </div>
+
+  <header class="text-center mt-6 mb-6">
     <h1 class="text-3xl md:text-4xl font-extrabold text-[color:var(--primary-600)] mb-2">Day 1: My Freedoms</h1>
     <p class="text-lg text-gray-700">A simple lesson about the Declaration of Independence</p>
   </header>
 
-  <main class="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-lg">
+  <main class="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-xl">
 
     <!-- I CAN Goals -->
     <section class="mb-6">
@@ -60,12 +155,14 @@
 
     <!-- Reading section -->
     <section class="mb-6 border-b pb-4">
+      <!-- ... Reading content remains the same ... -->
       <div class="flex items-start justify-between gap-4">
-        <div>
-          <h2 class="text-2xl font-bold text-[color:var(--primary-600)] mb-2">Reading: The Go-Free Paper</h2>
+        <div class="flex-1">
+          <h2 class="text-2xl font-bold text-[color:var(--primary-600)] mb-4">Reading: The Go-Free Paper</h2>
 
           <!-- chunked text with audio -->
           <article class="space-y-3 text-lg text-gray-700">
+            <!-- Chunk 1 -->
             <div class="bg-blue-50 p-3 rounded-md flex items-start gap-3">
               <div class="flex-1">
                 <p id="p1" class="leading-relaxed">
@@ -74,10 +171,11 @@
                 <p class="text-sm text-gray-500 mt-2">(This paper is called the <strong>Declaration of Independence</strong>.)</p>
               </div>
               <div class="shrink-0">
-                <button class="px-3 py-2 bg-[color:var(--primary-600)] text-white rounded-md shadow-sm" onclick="speakChunk('A long time ago, people in America wrote a paper. It told why they wanted freedom.', true)" aria-label="Read paragraph 1 aloud">🔊 Listen</button>
+                <button class="px-3 py-2 bg-[color:var(--primary-600)] text-white rounded-md shadow-sm hover:bg-blue-700 transition" onclick="speakChunk('A long time ago, people in America wrote a paper. It told why they wanted freedom.', true)" aria-label="Read paragraph 1 aloud">🔊 Listen</button>
               </div>
             </div>
 
+            <!-- Chunk 2 -->
             <div class="bg-blue-50 p-3 rounded-md flex items-start gap-3">
               <div class="flex-1">
                 <p id="p2" class="leading-relaxed">
@@ -86,10 +184,11 @@
                 <p class="text-sm text-gray-500 mt-2">(We call these <strong>My Freedoms</strong>.)</p>
               </div>
               <div class="shrink-0">
-                <button class="px-3 py-2 bg-[color:var(--primary-600)] text-white rounded-md shadow-sm" onclick="speakChunk('The paper said people are born with rights. That means people have things they should always have.', true)" aria-label="Read paragraph 2 aloud">🔊 Listen</button>
+                <button class="px-3 py-2 bg-[color:var(--primary-600)] text-white rounded-md shadow-sm hover:bg-blue-700 transition" onclick="speakChunk('The paper said people are born with rights. That means people have things they should always have.', true)" aria-label="Read paragraph 2 aloud">🔊 Listen</button>
               </div>
             </div>
 
+            <!-- Chunk 3 -->
             <div class="bg-blue-50 p-3 rounded-md flex items-start gap-3">
               <div class="flex-1">
                 <p id="p3" class="leading-relaxed">
@@ -97,21 +196,22 @@
                 </p>
               </div>
               <div class="shrink-0">
-                <button class="px-3 py-2 bg-[color:var(--primary-600)] text-white rounded-md shadow-sm" onclick="speakChunk('The three big freedoms are: to live, to be free, and to be happy.', true)" aria-label="Read paragraph 3 aloud">🔊 Listen</button>
+                <button class="px-3 py-2 bg-[color:var(--primary-600)] text-white rounded-md shadow-sm hover:bg-blue-700 transition" onclick="speakChunk('The three big freedoms are: to live, to be free, and to be happy.', true)" aria-label="Read paragraph 3 aloud">🔊 Listen</button>
               </div>
             </div>
           </article>
         </div>
 
         <!-- Picture glossary -->
-        <aside class="w-44 hidden md:block">
-          <h3 class="font-semibold text-[color:var(--primary-600)] mb-2">Word Help</h3>
+        <aside class="w-44 hidden md:block shrink-0">
+          <h3 class="font-bold text-[color:var(--primary-600)] mb-2 border-b pb-1">Word Help</h3>
           <ul class="space-y-3 text-sm">
-            <li class="glossary-term relative p-2 rounded-md bg-white border">
+            <!-- Glossary Item: Declaration -->
+            <li class="glossary-term relative p-2 rounded-md bg-white border border-gray-200 focus-within:ring-2 focus-within:ring-[color:var(--primary-400)]">
               <strong>Declaration</strong>
-              <div class="tooltip-inner left-0 -top-2 -translate-y-full">
+              <div class="tooltip-inner md:absolute left-full top-1/2 -translate-y-1/2 md:mt-0 mt-2">
                 <div class="flex items-center gap-2">
-                  <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 24 24' fill='%232563eb'><path d='M3 5h18v2H3zm0 6h18v2H3zm0 6h18v2H3z' /></svg>" alt="" class="w-8 h-8" />
+                  <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 24 24' fill='%232563eb'><path d='M3 5h18v2H3zm0 6h18v2H3zm0 6h18v2H3z' /></svg>" alt="Icon of stacked papers" class="w-8 h-8" />
                   <div>
                     <p class="font-semibold">Declaration</p>
                     <p class="text-xs text-gray-600">A paper that tells an important idea.</p>
@@ -120,11 +220,12 @@
               </div>
             </li>
 
-            <li class="glossary-term relative p-2 rounded-md bg-white border">
+            <!-- Glossary Item: Freedom -->
+            <li class="glossary-term relative p-2 rounded-md bg-white border border-gray-200 focus-within:ring-2 focus-within:ring-[color:var(--primary-400)]">
               <strong>Freedom</strong>
-              <div class="tooltip-inner left-0 -top-2 -translate-y-full">
+              <div class="tooltip-inner md:absolute left-full top-1/2 -translate-y-1/2 md:mt-0 mt-2">
                 <div class="flex items-center gap-2">
-                  <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 24 24' fill='%23f59e0b'><path d='M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z'/></svg>" alt="" class="w-8 h-8" />
+                  <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 24 24' fill='%23f59e0b'><path d='M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z'/></svg>" alt="Icon of a star" class="w-8 h-8" />
                   <div>
                     <p class="font-semibold">Freedom</p>
                     <p class="text-xs text-gray-600">When you can choose and move safely.</p>
@@ -133,11 +234,12 @@
               </div>
             </li>
 
-            <li class="glossary-term relative p-2 rounded-md bg-white border">
+            <!-- Glossary Item: Rights -->
+            <li class="glossary-term relative p-2 rounded-md bg-white border border-gray-200 focus-within:ring-2 focus-within:ring-[color:var(--primary-400)]">
               <strong>Rights</strong>
-              <div class="tooltip-inner left-0 -top-2 -translate-y-full">
+              <div class="tooltip-inner md:absolute left-full top-1/2 -translate-y-1/2 md:mt-0 mt-2">
                 <div class="flex items-center gap-2">
-                  <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 24 24' fill='%231f2937'><path d='M12 2C7.03 2 3 6.03 3 11c0 5.25 8.25 11 9 11s9-5.75 9-11c0-4.97-4.03-9-9-9z'/></svg>" alt="" class="w-8 h-8" />
+                  <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 24 24' fill='%231f2937'><path d='M12 2C7.03 2 3 6.03 3 11c0 5.25 8.25 11 9 11s9-5.75 9-11c0-4.97-4.03-9-9-9z'/></svg>" alt="Icon of a shield" class="w-8 h-8" />
                   <div>
                     <p class="font-semibold">Rights</p>
                     <p class="text-xs text-gray-600">Things people should have because they are people.</p>
@@ -145,73 +247,106 @@
                 </div>
               </div>
             </li>
-
           </ul>
         </aside>
       </div>
 
-      <!-- Simple comprehension check -->
-      <div class="mt-4">
-        <h3 class="font-semibold text-[color:var(--primary-600)]">Check for Understanding</h3>
+      <!-- Simple comprehension check (not tracked for completion) -->
+      <div class="mt-4 border-t pt-4">
+        <h3 class="font-bold text-[color:var(--primary-600)] text-xl">Check for Understanding</h3>
         <p class="text-gray-700 mt-2">What is the "Go-Free Paper"?</p>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
-          <button onclick="checkAnswer(this, true)" class="p-3 bg-white rounded-md border hover:bg-green-50 text-left">The Declaration of Independence</button>
-          <button onclick="checkAnswer(this, false)" class="p-3 bg-white rounded-md border hover:bg-red-50 text-left">A rule book for school</button>
+          <button onclick="checkAnswer(this, true)" class="p-3 bg-white rounded-md border hover:border-green-400 text-left transition">The Declaration of Independence</button>
+          <button onclick="checkAnswer(this, false)" class="p-3 bg-white rounded-md border hover:border-red-400 text-left transition">A rule book for school</button>
         </div>
       </div>
     </section>
 
-    <!-- Activity 1: Save the Idea Card -->
-    <section class="mb-6">
-      <h2 class="text-2xl font-bold text-[color:var(--primary-600)] mb-2">Activity 1: Save the Idea Card</h2>
-      <p class="text-gray-600 mb-4">Drag the <strong>Idea Card</strong> into the box. We will use this idea later.</p>
+    <!-- Activity 1: MATCH THE MAIN IDEA -->
+    <section class="mb-6" data-activity="A1">
+      <h2 class="text-2xl font-bold text-[color:var(--primary-600)] mb-2 flex justify-between items-center">
+        Activity 1: Match the Main Idea
+        <span id="A1Status" class="text-sm font-medium text-red-500">❌ To Do</span>
+      </h2>
+      <p class="text-gray-600 mb-4">Drag each blue **Idea Card** to the picture and sentence that match it best.</p>
 
-      <div class="flex flex-col md:flex-row items-center gap-4">
-        <div id="ideaCard" class="concept-card bg-white p-4 rounded-lg shadow w-full md:w-1/3" draggable="true" data-concept="Natural Rights" aria-grabbed="false" role="img" aria-label="Idea card: My Freedoms">
-          <p class="text-3xl font-extrabold text-[color:var(--accent-500)]">My Freedoms</p>
-          <p class="text-sm text-gray-500 mt-1">(The Declaration)</p>
+      <!-- Drag Items -->
+      <div id="dragIdeas" class="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 rounded-md bg-blue-100 mb-6">
+        <div id="idea-rights" class="drag-item-idea p-3 rounded-lg shadow" draggable="true" data-idea="rights" role="button" aria-grabbed="false">
+          People are born with rights
         </div>
-
-        <div id="dropTarget" class="bg-gray-50 border-4 border-dashed border-gray-300 p-6 rounded-lg w-full md:w-1/2 h-32 flex items-center justify-center text-gray-500" aria-dropeffect="move">
-          <p id="dropText">Drop the Idea Card here to save it</p>
+        <div id="idea-govt" class="drag-item-idea p-3 rounded-lg shadow" draggable="true" data-idea="govt" role="button" aria-grabbed="false">
+          Government protects rights
+        </div>
+        <div id="idea-change" class="drag-item-idea p-3 rounded-lg shadow" draggable="true" data-idea="change" role="button" aria-grabbed="false">
+          People can change the government
         </div>
       </div>
+
+      <!-- Drop Targets -->
+      <div id="dropMatches" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+        <!-- Target 1: Rights -->
+        <div class="drop-target-match p-4 rounded-xl flex flex-col items-center justify-center" data-accept="rights" aria-dropeffect="move">
+          <span class="text-5xl mb-3" role="img" aria-label="two equally sized people">🧑=🧑</span>
+          <p class="text-sm font-semibold text-gray-700 text-center">Everyone is equal from the start.</p>
+        </div>
+
+        <!-- Target 2: Change -->
+        <div class="drop-target-match p-4 rounded-xl flex flex-col items-center justify-center" data-accept="change" aria-dropeffect="move">
+          <span class="text-5xl mb-3" role="img" aria-label="hand pushing a broken gear">🛠️⚙️</span>
+          <p class="text-sm font-semibold text-gray-700 text-center">People have the power to fix problems.</p>
+        </div>
+
+        <!-- Target 3: Government -->
+        <div class="drop-target-match p-4 rounded-xl flex flex-col items-center justify-center" data-accept="govt" aria-dropeffect="move">
+          <span class="text-5xl mb-3" role="img" aria-label="a shield protecting people">🛡️🏡</span>
+          <p class="text-sm font-semibold text-gray-700 text-center">Rules are made to keep us safe.</p>
+        </div>
+      </div>
+      <div id="activity1Feedback" class="text-center mt-4 text-lg font-bold text-gray-600"></div>
     </section>
 
-    <!-- Activity 2: Find the Freedoms -->
-    <section class="mb-6">
-      <h2 class="text-2xl font-bold text-[color:var(--primary-600)] mb-3">Activity 2: Find the Freedoms</h2>
-      <p class="text-gray-600 mb-3">Tap or click the <strong>three pictures</strong> that show a freedom.</p>
+    <!-- Activity 2: Find the Freedoms (Tapping) -->
+    <section class="mb-6" data-activity="A2">
+      <h2 class="text-2xl font-bold text-[color:var(--primary-600)] mb-3 flex justify-between items-center">
+        Activity 2: Find the Freedoms
+        <span id="A2Status" class="text-sm font-medium text-red-500">❌ To Do</span>
+      </h2>
+      <p class="text-gray-600 mb-3">Tap or click the **three pictures** that show a freedom.</p>
 
       <div id="freedomOptions" class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="freedom-option bg-white p-4 rounded-md text-center" data-correct="true" role="button" tabindex="0" aria-pressed="false">
-          <span class="text-5xl" role="img" aria-label="smiling face">😄</span>
+        <div class="freedom-option bg-white p-4 rounded-md text-center shadow" data-correct="true" role="button" tabindex="0" aria-pressed="false">
+          <span class="text-5xl" role="img" aria-label="smiling face emoji">😄</span>
           <p class="text-sm text-gray-500 mt-2">Being happy</p>
         </div>
 
-        <div class="freedom-option bg-white p-4 rounded-md text-center" data-correct="false" role="button" tabindex="0" aria-pressed="false">
-          <span class="text-5xl" role="img" aria-label="locked chain">🔒🔗</span>
+        <div class="freedom-option bg-white p-4 rounded-md text-center shadow" data-correct="false" role="button" tabindex="0" aria-pressed="false">
+          <span class="text-5xl" role="img" aria-label="locked chain emoji">🔒🔗</span>
           <p class="text-sm text-gray-500 mt-2">Locked up</p>
         </div>
 
-        <div class="freedom-option bg-white p-4 rounded-md text-center" data-correct="true" role="button" tabindex="0" aria-pressed="false">
-          <span class="text-5xl" role="img" aria-label="child playing">🧸⚽</span>
+        <div class="freedom-option bg-white p-4 rounded-md text-center shadow" data-correct="true" role="button" tabindex="0" aria-pressed="false">
+          <span class="text-5xl" role="img" aria-label="child playing with toys emoji">🧸⚽</span>
           <p class="text-sm text-gray-500 mt-2">Play and fun</p>
         </div>
 
-        <div class="freedom-option bg-white p-4 rounded-md text-center" data-correct="true" role="button" tabindex="0" aria-pressed="false">
-          <span class="text-5xl" role="img" aria-label="running outside">🏃‍♀️🌳</span>
+        <div class="freedom-option bg-white p-4 rounded-md text-center shadow" data-correct="true" role="button" tabindex="0" aria-pressed="false">
+          <span class="text-5xl" role="img" aria-label="running person emoji">🏃‍♀️🌳</span>
           <p class="text-sm text-gray-500 mt-2">Run and move</p>
         </div>
       </div>
     </section>
 
-    <!-- Activity 3: Match the Freedoms -->
-    <section class="mb-6">
-      <h2 class="text-2xl font-bold text-[color:var(--primary-600)] mb-3">Activity 3: Match the Three Freedoms</h2>
+    <!-- Activity 3: Match the Freedoms (Drag & Drop) -->
+    <section class="mb-6" data-activity="A3">
+      <h2 class="text-2xl font-bold text-[color:var(--primary-600)] mb-3 flex justify-between items-center">
+        Activity 3: Match the Three Freedoms
+        <span id="A3Status" class="text-sm font-medium text-red-500">❌ To Do</span>
+      </h2>
       <p class="text-gray-600 mb-3">Drag each right card to the matching picture and sentence.</p>
 
-      <div id="dragRights" class="flex flex-wrap gap-3 p-4 rounded-md bg-blue-50 mb-4">
+      <div id="dragRights" class="flex flex-wrap justify-center gap-3 p-4 rounded-md bg-blue-50 mb-6">
         <div id="drag-live" class="drag-item bg-[color:var(--accent-500)] text-white p-3 rounded-md shadow cursor-grab" draggable="true" data-right="live" role="button" aria-grabbed="false">
           The Right to LIVE
         </div>
@@ -227,17 +362,17 @@
 
       <div id="dropDefinitions" class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div class="drop-target p-4 border-4 border-dashed border-yellow-300 rounded-xl text-center flex flex-col items-center justify-center" data-accept="happy" aria-dropeffect="move">
-          <span class="text-4xl mb-2" role="img" aria-label="star">⭐</span>
+          <span class="text-4xl mb-2" role="img" aria-label="star emoji">⭐</span>
           <p class="font-semibold text-gray-700">To set goals and dream</p>
         </div>
 
         <div class="drop-target p-4 border-4 border-dashed border-[color:var(--accent-500)] rounded-xl text-center flex flex-col items-center justify-center" data-accept="live" aria-dropeffect="move">
-          <span class="text-4xl mb-2" role="img" aria-label="heart">❤️</span>
+          <span class="text-4xl mb-2" role="img" aria-label="heart emoji">❤️</span>
           <p class="font-semibold text-gray-700">To be safe and healthy</p>
         </div>
 
         <div class="drop-target p-4 border-4 border-dashed border-[color:var(--primary-400)] rounded-xl text-center flex flex-col items-center justify-center" data-accept="free" aria-dropeffect="move">
-          <span class="text-4xl mb-2" role="img" aria-label="running">🏃</span>
+          <span class="text-4xl mb-2" role="img" aria-label="running person emoji">🏃</span>
           <p class="font-semibold text-gray-700">To make choices and move</p>
         </div>
       </div>
@@ -246,32 +381,43 @@
     </section>
 
     <!-- Activity 4: Draw Your Freedom -->
-    <section class="mb-6">
-      <h2 class="text-2xl font-bold text-[color:var(--primary-600)] mb-3">Activity 4: Draw Your Freedom</h2>
+    <section class="mb-6" data-activity="A4">
+      <h2 class="text-2xl font-bold text-[color:var(--primary-600)] mb-3 flex justify-between items-center">
+        Activity 4: Draw Your Freedom
+        <span id="A4Status" class="text-sm font-medium text-red-500">❌ To Do</span>
+      </h2>
       <p class="text-gray-600 mb-3">Draw a picture of your favorite freedom. Write a short sentence too.</p>
 
       <div class="p-4 bg-gray-50 rounded-md">
         <div class="flex items-center gap-3 mb-3">
           <label for="penColor" class="font-medium">Pen Color:</label>
           <input type="color" id="penColor" value="#000000" class="w-10 h-10 rounded-full border" aria-label="Pen color" />
-          <button id="clearButton" class="ml-3 px-3 py-2 bg-[color:var(--primary-600)] text-white rounded-md">Clear</button>
+          <button id="clearButton" class="ml-3 px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition">Clear</button>
 
-          <button id="saveImageBtn" class="ml-auto px-3 py-2 bg-[color:var(--accent-500)] text-white rounded-md" title="Save drawing as image">Save Image</button>
+          <button id="saveImageBtn" class="ml-auto px-3 py-2 bg-[color:var(--accent-500)] text-white rounded-md hover:bg-yellow-600 transition" title="Save drawing as image">Save Image</button>
         </div>
 
-        <canvas id="drawingCanvas" class="border rounded-md bg-white" aria-label="Drawing pad area"></canvas>
+        <canvas id="drawingCanvas" class="border rounded-md bg-white shadow-inner" aria-label="Drawing pad area"></canvas>
 
         <label for="freedomLabel" class="block text-gray-700 font-medium mt-4 mb-2">My favorite freedom is:</label>
-        <input type="text" id="freedomLabel" class="w-full p-3 border border-gray-300 rounded-md" placeholder="Example: playing outside with friends" />
+        <input type="text" id="freedomLabel" class="w-full p-3 border border-gray-300 rounded-md focus:border-[color:var(--primary-600)] focus:ring-1 focus:ring-[color:var(--primary-600)]" placeholder="Example: playing outside with friends" aria-label="Input for favorite freedom" />
       </div>
     </section>
+
+    <!-- Finish Button -->
+    <div class="text-center py-6">
+        <button id="finishButton" onclick="window.location.href='certificate.html'" class="px-8 py-4 text-2xl font-black bg-green-500 text-white rounded-xl shadow-xl hover:bg-green-600 transition duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+            <span class="inline-block mr-2 text-3xl">🏆</span> Finish Day 1!
+        </button>
+        <p id="finishMessage" class="mt-3 text-red-500 font-medium">Complete all activities to unlock the finish button.</p>
+    </div>
 
     <!-- Optional stretch -->
     <section class="mb-6">
       <div class="bg-blue-50 p-4 rounded-md border-l-4 border-[color:var(--primary-600)]">
         <h3 class="font-bold text-[color:var(--primary-600)]">💭 Think Hard (optional)</h3>
         <p class="text-gray-700 mt-2">Why do you think people wanted to make their own rules? Say one reason in your own words.</p>
-        <button class="mt-3 px-3 py-2 bg-white border rounded-md" onclick="speakChunk('Why do you think people wanted to make their own rules? Say one reason in your own words.', true)">🔊 Listen</button>
+        <button class="mt-3 px-3 py-2 bg-white border rounded-md hover:bg-gray-100 transition" onclick="speakChunk('Why do you think people wanted to make their own rules? Say one reason in your own words.', true)" aria-label="Listen to the challenge question">🔊 Listen</button>
       </div>
     </section>
 
@@ -282,22 +428,81 @@
 
   <script>
     /***********************
+      GLOBAL STATE & PROGRESS TRACKING
+    ***********************/
+    // State to track completion of the four activities (A1, A2, A3, A4)
+    let activityCompletion = { A1: false, A2: false, A3: false, A4: false };
+    const totalActivities = 4;
+
+    const progressText = document.getElementById('progressText');
+    const progressBar = document.getElementById('progressBar');
+    const finishButton = document.getElementById('finishButton');
+    const finishMessage = document.getElementById('finishMessage');
+
+    /**
+     * Marks an activity as complete and updates global progress.
+     * @param {string} activityId - e.g., 'A1', 'A2', 'A3', 'A4'
+     * @param {string} activityName - description for feedback/status
+     */
+    function markActivityComplete(activityId, activityName) {
+      if (activityCompletion[activityId] === true) return; // Already complete
+
+      activityCompletion[activityId] = true;
+      showFeedback(`Activity ${activityId} Complete: ${activityName}!`, 'bg-blue-500');
+
+      // Update local status label
+      const statusElement = document.getElementById(`${activityId}Status`);
+      if (statusElement) {
+        statusElement.textContent = '✅ Done!';
+        statusElement.classList.remove('text-red-500');
+        statusElement.classList.add('text-green-600', 'font-extrabold');
+      }
+
+      checkOverallCompletion();
+    }
+
+    /**
+     * Checks all activity statuses and updates the progress bar and finish button.
+     */
+    function checkOverallCompletion() {
+      let completedCount = 0;
+      for (const id in activityCompletion) {
+        if (activityCompletion[id]) {
+          completedCount++;
+        }
+      }
+
+      const percentage = (completedCount / totalActivities) * 100;
+      progressText.textContent = `${completedCount}/${totalActivities} Activities Done`;
+      progressBar.style.width = `${percentage}%`;
+
+      if (completedCount === totalActivities) {
+        finishButton.disabled = false;
+        finishButton.classList.remove('disabled:opacity-50', 'disabled:cursor-not-allowed');
+        finishMessage.textContent = 'Awesome! Click the button below to get your certificate!';
+        finishMessage.classList.remove('text-red-500');
+        finishMessage.classList.add('text-green-600', 'font-extrabold');
+      } else {
+        finishButton.disabled = true;
+        finishMessage.textContent = `Complete ${totalActivities - completedCount} more activities to finish.`;
+      }
+    }
+
+
+    /***********************
       Speech synthesis helpers
     ***********************/
     let chosenVoice = null;
-    const preferLang = 'en-US'; // neutral American English
+    const preferLang = 'en-US';
     const synth = window.speechSynthesis;
 
     function pickVoice() {
-      // pick best matching voice with en-US if available
       const voices = synth.getVoices();
       if (!voices || voices.length === 0) return null;
 
-      // try to find common names for a neutral en-US voice
       const candidates = voices.filter(v => v.lang && v.lang.startsWith(preferLang));
-
-      // prefer female/neutral voice names commonly available
       const preferNames = ['Google US English', 'Alex', 'Samantha', 'Daniel', 'Microsoft Zira', 'Alloy', 'en-US'];
+
       for (const name of preferNames) {
         const v = candidates.find(x => x.name && x.name.toLowerCase().includes(name.toLowerCase()));
         if (v) {
@@ -305,12 +510,10 @@
           return v;
         }
       }
-      // fallback to first en-US voice, or first voice overall
       chosenVoice = candidates[0] || voices[0];
       return chosenVoice;
     }
 
-    // some browsers load voices asynchronously
     function ensureVoiceReady() {
       return new Promise(resolve => {
         let voices = synth.getVoices();
@@ -319,31 +522,39 @@
           resolve();
           return;
         }
-        // wait for voiceschanged event
         synth.addEventListener('voiceschanged', () => {
           pickVoice();
           resolve();
         });
-        // fallback timeout
-        setTimeout(() => { pickVoice(); resolve(); }, 1000);
+        setTimeout(() => { pickVoice(); resolve(); }, 1500);
       });
     }
 
     function speakChunk(text, slow = true) {
-      if (!('speechSynthesis' in window)) {
-        showFeedback('Audio not supported in this browser', 'bg-gray-600');
+      if (!('speechSynthesis' in window) || synth.speaking) {
+        if(synth.speaking) synth.cancel();
         return;
       }
+
       ensureVoiceReady().then(() => {
         const u = new SpeechSynthesisUtterance(text);
-        u.rate = slow ? 0.9 : 1.0; // slightly slower for readability
+        u.rate = slow ? 0.9 : 1.0;
         u.pitch = 1.0;
         if (chosenVoice) u.voice = chosenVoice;
         u.lang = preferLang;
-        synth.cancel(); // stop previous
+
+        u.onstart = () => showFeedback('🔊 Reading...', 'bg-indigo-500');
+        u.onend = () => showFeedback('Audio complete.', 'bg-gray-600');
+        u.onerror = (e) => console.error('[TTS Error]', e);
+
         synth.speak(u);
       });
     }
+
+    window.onload = () => {
+        pickVoice();
+        checkOverallCompletion(); // Initial check on load
+    };
 
     /***********************
       Small UI feedback helper
@@ -352,15 +563,18 @@
     function showFeedback(message, bgClass) {
       feedbackBox.textContent = message;
       feedbackBox.style.display = 'block';
-      // simple color mapping based on class-like name
+
+      // Simple color mapping
       if (bgClass === 'bg-green-500') {
         feedbackBox.style.background = '#10b981';
       } else if (bgClass === 'bg-red-500') {
         feedbackBox.style.background = '#ef4444';
-      } else if (bgClass === 'bg-gray-500') {
-        feedbackBox.style.background = '#6b7280';
+      } else if (bgClass === 'bg-gray-600') {
+        feedbackBox.style.background = '#4b5563';
       } else if (bgClass === 'bg-blue-500') {
         feedbackBox.style.background = '#2563eb';
+      } else if (bgClass === 'bg-indigo-500') {
+        feedbackBox.style.background = '#6366f1';
       } else {
         feedbackBox.style.background = '#111827';
       }
@@ -371,69 +585,95 @@
       Comprehension check
     ***********************/
     function checkAnswer(button, correct) {
-      // style the chosen button
       const parent = button.parentElement;
       Array.from(parent.children).forEach(b => {
-        b.classList.remove('bg-green-50', 'bg-red-50');
+        b.classList.remove('bg-green-100', 'bg-red-100', 'border-green-500', 'border-red-500');
+        b.classList.add('bg-white');
       });
       if (correct) {
-        button.classList.add('bg-green-50');
-        showFeedback('✔️ Great job!', 'bg-green-500');
+        button.classList.remove('bg-white');
+        button.classList.add('bg-green-100', 'border-green-500');
+        showFeedback('✔️ Correct! Great job!', 'bg-green-500');
       } else {
-        button.classList.add('bg-red-50');
-        showFeedback('❌ Try again!', 'bg-red-500');
+        button.classList.remove('bg-white');
+        button.classList.add('bg-red-100', 'border-red-500');
+        showFeedback('❌ Incorrect. Try reading the text again!', 'bg-red-500');
       }
     }
 
     /***********************
-      Drag & Drop: Idea Card
+      Activity 1: Match the Main Idea (Drag & Drop)
     ***********************/
-    const card = document.getElementById('ideaCard');
-    const dropTarget = document.getElementById('dropTarget');
-    const dropText = document.getElementById('dropText');
+    const dragIdeas = document.querySelectorAll('#dragIdeas .drag-item-idea');
+    const dropMatches = document.querySelectorAll('#dropMatches .drop-target-match');
+    const activity1Feedback = document.getElementById('activity1Feedback');
+    let correctMatches = 0;
+    const totalMatches = 3;
 
-    card.addEventListener('dragstart', (e) => {
-      e.dataTransfer.setData('text/plain', e.target.dataset.concept);
-      card.setAttribute('aria-grabbed', 'true');
-      card.classList.add('opacity-60');
+    dragIdeas.forEach(item => {
+      item.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('text/plain', e.target.dataset.idea);
+        item.classList.add('opacity-60');
+        item.setAttribute('aria-grabbed', 'true');
+      });
+      item.addEventListener('dragend', (e) => {
+        item.classList.remove('opacity-60');
+        item.setAttribute('aria-grabbed', 'false');
+      });
     });
 
-    card.addEventListener('dragend', (e) => {
-      card.setAttribute('aria-grabbed', 'false');
-      card.classList.remove('opacity-60');
+    dropMatches.forEach(target => {
+      target.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        target.classList.add('drag-over');
+      });
+      target.addEventListener('dragleave', () => {
+        target.classList.remove('drag-over');
+      });
+      target.addEventListener('drop', (e) => {
+        e.preventDefault();
+        target.classList.remove('drag-over');
+        const draggedIdea = e.dataTransfer.getData('text/plain');
+        const acceptedIdea = target.dataset.accept;
+        const droppedElement = document.querySelector(`[data-idea="${draggedIdea}"]`);
+
+        if (draggedIdea === acceptedIdea && !target.classList.contains('matched')) {
+          target.classList.add('matched');
+
+          // Move the text content of the idea card to the target (easier than moving the element)
+          const ideaText = droppedElement.textContent;
+          target.innerHTML = `<p class="font-bold text-lg text-green-700 mb-2">${ideaText}</p>` + target.innerHTML;
+
+          // Hide the original card
+          droppedElement.classList.add('hidden-item');
+          droppedElement.draggable = false;
+
+          correctMatches++;
+          showFeedback('Correct Match!', 'bg-green-500');
+
+          if (correctMatches === totalMatches) {
+            activity1Feedback.textContent = "All Main Ideas Matched!";
+            activity1Feedback.classList.add('text-[color:var(--primary-600)]');
+            markActivityComplete('A1', 'Match the Main Idea');
+          }
+        } else if (draggedIdea !== acceptedIdea) {
+          showFeedback('Wrong Match! Try again.', 'bg-red-500');
+        }
+      });
     });
 
-    dropTarget.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      dropTarget.classList.add('bg-blue-50', 'border-[color:var(--primary-600)]');
-    });
-
-    dropTarget.addEventListener('dragleave', () => {
-      dropTarget.classList.remove('bg-blue-50', 'border-[color:var(--primary-600)]');
-    });
-
-    dropTarget.addEventListener('drop', (e) => {
-      e.preventDefault();
-      dropTarget.classList.remove('bg-blue-50', 'border-[color:var(--primary-600)]');
-      const data = e.dataTransfer.getData('text/plain');
-      if (data === 'Natural Rights') {
-        card.style.display = 'none';
-        dropTarget.classList.add('bg-green-50', 'border-green-400');
-        dropText.innerHTML = `<span class="text-green-700 font-bold">CARD SAVED!</span><br>${data} — Ready for Day 5!`;
-        showFeedback('Card Saved!', 'bg-green-500');
-      } else {
-        showFeedback('Wrong card! Try again.', 'bg-red-500');
-      }
-    });
 
     /***********************
       Activity 2: Select Pictures
     ***********************/
     const freedomOptions = document.querySelectorAll('.freedom-option');
     const totalCorrectA2 = 3;
+
     freedomOptions.forEach(option => {
-      // click and keyboard support
       const selectToggle = () => {
+        // Prevent action if already completed to prevent un-selecting and breaking progress
+        if (activityCompletion.A2) return;
+
         const isSelected = option.classList.contains('selected');
         if (!isSelected) {
           option.classList.add('selected');
@@ -463,19 +703,21 @@
         }
       });
       if (correctSelections === totalCorrectA2 && incorrectSelections === 0) {
-        showFeedback('Activity 2 Complete!', 'bg-blue-500');
-      } else if (incorrectSelections > 0) {
-        // gentle hint
-        showFeedback('One choice is wrong. Check again.', 'bg-red-500');
+        if (!activityCompletion.A2) {
+            markActivityComplete('A2', 'Find the Freedoms');
+        }
+      } else if (incorrectSelections > 0 && !activityCompletion.A2) {
+        // Only show error feedback if not already complete
+        showFeedback('One choice is wrong. Look again!', 'bg-red-500');
       }
     }
 
     /***********************
-      Activity 3: Drag & Drop Matching
+      Activity 3: Match the Three Freedoms (Drag & Drop)
     ***********************/
     const dragItems = document.querySelectorAll('.drag-item');
-    const dropTargets = document.querySelectorAll('.drop-target');
-    let correctDrops = 0;
+    const dropDefinitions = document.querySelectorAll('#dropDefinitions .drop-target');
+    let correctDropsA3 = 0; // Renamed to avoid collision with A1
     const totalDrops = 3;
 
     dragItems.forEach(item => {
@@ -490,7 +732,7 @@
       });
     });
 
-    dropTargets.forEach(target => {
+    dropDefinitions.forEach(target => {
       target.addEventListener('dragover', (e) => {
         e.preventDefault();
         target.classList.add('drag-over');
@@ -507,19 +749,24 @@
 
         if (draggedRight === acceptedRight && !target.classList.contains('dropped')) {
           target.classList.add('dropped');
-          droppedElement.classList.remove('bg-[color:var(--accent-500)]','bg-[color:var(--primary-600)]','bg-yellow-400');
-          droppedElement.classList.add('bg-green-500','shadow-none','p-2');
+
+          // Style the dropped element green and remove dragging ability
+          droppedElement.classList.remove('bg-[color:var(--accent-500)]','bg-[color:var(--primary-600)]','bg-yellow-400', 'shadow');
+          droppedElement.classList.add('bg-green-600','shadow-lg');
           droppedElement.style.margin = '4px auto';
           droppedElement.style.cursor = 'default';
           droppedElement.draggable = false;
-          target.innerHTML = '';
+
+          target.innerHTML = ''; // Clear existing content
           target.appendChild(droppedElement);
-          correctDrops++;
+          correctDropsA3++;
           showFeedback('Correct Match!', 'bg-green-500');
-          if (correctDrops === totalDrops) {
+
+          if (correctDropsA3 === totalDrops) {
             const feedbackArea = document.getElementById('dragDropFeedback');
-            feedbackArea.textContent = "All Three Freedoms Matched! Great work on Day 1!";
+            feedbackArea.textContent = "All Three Freedoms Matched!";
             feedbackArea.classList.add('text-[color:var(--primary-600)]');
+            markActivityComplete('A3', 'Match the Three Freedoms');
           }
         } else if (draggedRight !== acceptedRight) {
           showFeedback('Wrong Match! Try again.', 'bg-red-500');
@@ -528,52 +775,60 @@
     });
 
     /***********************
-      Drawing pad (canvas)
+      Activity 4: Drawing pad (canvas)
     ***********************/
     const canvas = document.getElementById('drawingCanvas');
     const ctx = canvas.getContext('2d');
     const clearButton = document.getElementById('clearButton');
     const penColorInput = document.getElementById('penColor');
     const saveImageBtn = document.getElementById('saveImageBtn');
+    const freedomLabel = document.getElementById('freedomLabel');
 
     let isDrawing = false;
     let lastX = 0;
     let lastY = 0;
     let currentColor = penColorInput.value;
+    let hasDrawn = false; // New flag to track drawing activity
 
     function resizeCanvas() {
-      // maintain CSS size but set backing size for crispness
-      const rect = canvas.getBoundingClientRect();
-      canvas.width = Math.floor(rect.width * devicePixelRatio);
-      canvas.height = Math.floor(rect.height * devicePixelRatio);
-      ctx.scale(devicePixelRatio, devicePixelRatio);
-      // fill background white
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, rect.width, rect.height);
-      // default styles
-      ctx.lineWidth = 5;
-      ctx.lineJoin = 'round';
-      ctx.lineCap = 'round';
+        const rect = canvas.getBoundingClientRect();
+        const displayWidth = rect.width;
+        const displayHeight = rect.height;
+
+        if (canvas.width !== displayWidth * devicePixelRatio || canvas.height !== displayHeight * devicePixelRatio) {
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCanvas.width = canvas.width;
+            tempCanvas.height = canvas.height;
+            tempCtx.drawImage(canvas, 0, 0);
+
+            canvas.width = Math.floor(displayWidth * devicePixelRatio);
+            canvas.height = Math.floor(displayHeight * devicePixelRatio);
+            ctx.scale(devicePixelRatio, devicePixelRatio);
+
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, displayWidth, displayHeight);
+            ctx.drawImage(tempCanvas, 0, 0, displayWidth, displayHeight);
+        }
+
+        ctx.lineWidth = 5;
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = currentColor;
     }
 
-    // set an initial CSS height so the canvas has layout space
-    canvas.style.height = '240px';
-    canvas.style.width = '100%';
-
-    window.addEventListener('load', () => { resizeCanvas(); });
-    window.addEventListener('resize', () => { 
-      // save drawing optionally? For now, clear on resize to keep simple
-      resizeCanvas();
-    });
+    window.addEventListener('load', resizeCanvas);
+    window.addEventListener('resize', resizeCanvas);
 
     penColorInput.addEventListener('input', (e) => { currentColor = e.target.value; });
 
     clearButton.addEventListener('click', () => {
       const rect = canvas.getBoundingClientRect();
-      ctx.clearRect(0, 0, rect.width, rect.height);
+      ctx.clearRect(0, 0, rect.width * devicePixelRatio, rect.height * devicePixelRatio);
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, rect.width, rect.height);
-      showFeedback('Canvas cleared', 'bg-gray-500');
+      showFeedback('Canvas cleared', 'bg-gray-600');
+      hasDrawn = false;
     });
 
     function getPos(e) {
@@ -599,10 +854,12 @@
       ctx.lineTo(pos.x, pos.y);
       ctx.stroke();
       lastX = pos.x; lastY = pos.y;
+      hasDrawn = true; // Mark that the user has drawn
     }
 
     function startDrawing(e) {
       isDrawing = true;
+      ctx.strokeStyle = currentColor;
       const pos = getPos(e);
       lastX = pos.x; lastY = pos.y;
     }
@@ -611,48 +868,48 @@
       isDrawing = false;
     }
 
-    // mouse
+    // mouse events
     canvas.addEventListener('mousedown', startDrawing);
     canvas.addEventListener('mousemove', draw);
     canvas.addEventListener('mouseup', stopDrawing);
     canvas.addEventListener('mouseout', stopDrawing);
-    // touch
+    // touch events
     canvas.addEventListener('touchstart', startDrawing, {passive:false});
     canvas.addEventListener('touchmove', draw, {passive:false});
     canvas.addEventListener('touchend', stopDrawing);
 
-    // Save as image
+    // Save as image and check for completion
     saveImageBtn.addEventListener('click', () => {
-      const rect = canvas.getBoundingClientRect();
-      // create a new canvas to export with desired pixel ratio
-      const exportCanvas = document.createElement('canvas');
-      exportCanvas.width = rect.width;
-      exportCanvas.height = rect.height;
-      const exportCtx = exportCanvas.getContext('2d');
-      // paint white background
-      exportCtx.fillStyle = '#ffffff';
-      exportCtx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
-      // draw current canvas content
-      // we need to draw from the display canvas; easiest way: use toDataURL from original
-      try {
-        const dataURL = canvas.toDataURL('image/png');
-        const link = document.createElement('a');
-        link.href = dataURL;
-        link.download = 'my_freedom_drawing.png';
-        link.click();
-      } catch (err) {
-        showFeedback('Cannot save image in this browser', 'bg-gray-500');
-      }
+        const labelText = freedomLabel.value.trim();
+
+        if (hasDrawn && labelText) {
+            try {
+                const dataURL = canvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                link.href = dataURL;
+                const label = labelText.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'my_freedom_drawing';
+                link.download = label + '.png';
+                link.click();
+                showFeedback('Drawing saved!', 'bg-green-500');
+                markActivityComplete('A4', 'Draw Your Freedom');
+            } catch (err) {
+                console.error('Save image error:', err);
+                showFeedback('Cannot save image in this browser.', 'bg-red-500');
+            }
+        } else if (!hasDrawn) {
+            showFeedback('Please draw your picture first!', 'bg-red-500');
+        } else if (!labelText) {
+            showFeedback('Please write your sentence first!', 'bg-red-500');
+        }
     });
 
-    /***********************
-      Initialize some things on startup
-    ***********************/
-    // call ensure voice
-    ensureVoiceReady().then(() => {
-      // no UI change needed but voice should be selected if available
+    // Simple completion check if they type and then click outside
+    freedomLabel.addEventListener('change', () => {
+        if (hasDrawn && freedomLabel.value.trim() !== '' && !activityCompletion.A4) {
+            // Note: This only marks complete on change IF they drew something. 
+            // The main completion should be the save button to ensure the artifact is generated.
+        }
     });
-
   </script>
 </body>
 </html>
