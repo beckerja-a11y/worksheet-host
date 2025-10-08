@@ -1,658 +1,629 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Day 1: My Freedoms (Natural Rights)</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
-    :root{
-      --primary-600: #2563eb; /* soft blue */
-      --primary-400: #60a5fa;
-      --accent-500: #f59e0b; /* warm yellow */
-      --muted-100: #f8fafc;
-      --card-border: rgba(37,99,235,0.12);
+import { useState, useRef, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card } from '@/components/ui/card';
+import { Volume2, Trash2, Save } from 'lucide-react';
+import { toast } from 'sonner';
+
+const Day1 = () => {
+  const [selectedFreedoms, setSelectedFreedoms] = useState<Set<number>>(new Set());
+  const [draggedRight, setDraggedRight] = useState<string | null>(null);
+  const [droppedRights, setDroppedRights] = useState<Record<string, string>>({});
+  const [draggedConcept, setDraggedConcept] = useState<string | null>(null);
+  const [matchedConcepts, setMatchedConcepts] = useState<Record<string, string>>({});
+  const [freedomText, setFreedomText] = useState('');
+  
+  // Activity completion tracking
+  const [activity1Complete, setActivity1Complete] = useState(false);
+  const [activity2Complete, setActivity2Complete] = useState(false);
+  const [activity3Complete, setActivity3Complete] = useState(false);
+  const [activity4Complete, setActivity4Complete] = useState(false);
+  
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [penColor, setPenColor] = useState('#000000');
+
+  // Text-to-speech function
+  const speak = (text: string, slow = true) => {
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = slow ? 0.9 : 1.0;
+      utterance.pitch = 1.0;
+      window.speechSynthesis.speak(utterance);
+    } else {
+      toast.error('Text-to-speech not supported in this browser');
     }
-    body{
-      font-family: 'Inter', sans-serif;
-      background-color: var(--muted-100);
-    }
-    .concept-card { cursor: grab; transition: transform 0.18s, box-shadow 0.18s; border: 4px solid rgba(245,158,11,0.08); }
-    .concept-card:active { cursor: grabbing; box-shadow: 0 10px 20px rgba(99,102,241,0.12); transform: scale(1.03); }
-    .freedom-option { transition: all 0.16s; cursor: pointer; box-shadow: 0 2px 6px rgba(2,6,23,0.06); }
-    .freedom-option:hover { transform: scale(1.03); box-shadow: 0 6px 14px rgba(2,6,23,0.08); }
-    .selected { border: 4px solid #10b981; background-color: #d1fae5; }
-    .drag-item { cursor: grab; transition: opacity 0.12s; min-width: 100px; }
-    .drag-item.dragging { opacity: 0.5; }
-    .drop-target { background-color: #ffffff; transition: background-color .12s, border-color .12s; min-height: 160px; }
-    .drop-target.drag-over { background-color: #eff6ff; border-color: var(--primary-600); }
-    .drop-target.dropped { border-color: #10b981 !important; background-color: #d1fae5; }
-    .feedback { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); padding: 16px 20px; border-radius: 10px; box-shadow: 0 12px 30px rgba(2,6,23,0.2); z-index: 1000; color: white; font-weight:700; }
-    .tooltip-inner { display:none; position:absolute; z-index: 50; width: 220px; background: white; border:1px solid rgba(2,6,23,0.06); padding:8px; border-radius:8px; box-shadow:0 8px 20px rgba(2,6,23,0.08); }
-    .glossary-term:hover .tooltip-inner, .glossary-term:focus-within .tooltip-inner { display:block; }
-    /* small helper for visually hidden text (screen readers) */
-    .sr-only { position: absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
-    /* canvas fallback size */
-    #drawingCanvas { width: 100%; height: 240px; }
-  </style>
-</head>
-<body class="p-4 md:p-8 text-gray-800">
+  };
 
-  <header class="text-center mb-6">
-    <h1 class="text-3xl md:text-4xl font-extrabold text-[color:var(--primary-600)] mb-2">Day 1: My Freedoms</h1>
-    <p class="text-lg text-gray-700">A simple lesson about the Declaration of Independence</p>
-  </header>
-
-  <main class="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-lg">
-
-    <!-- I CAN Goals -->
-    <section class="mb-6">
-      <div class="bg-yellow-50 border-l-4 border-[color:var(--accent-500)] p-4 rounded-md">
-        <p class="font-bold text-lg">🌟 Today I Can:</p>
-        <ul class="list-disc ml-6 text-gray-700 mt-2">
-          <li>Say what the "Go-Free Paper" is.</li>
-          <li>Name three freedoms people have.</li>
-          <li>Draw a picture of a freedom I like.</li>
-        </ul>
-      </div>
-    </section>
-
-    <!-- Reading section -->
-    <section class="mb-6 border-b pb-4">
-      <div class="flex items-start justify-between gap-4">
-        <div>
-          <h2 class="text-2xl font-bold text-[color:var(--primary-600)] mb-2">Reading: The Go-Free Paper</h2>
-
-          <!-- chunked text with audio -->
-          <article class="space-y-3 text-lg text-gray-700">
-            <div class="bg-blue-50 p-3 rounded-md flex items-start gap-3">
-              <div class="flex-1">
-                <p id="p1" class="leading-relaxed">
-                  A long time ago, people in America wrote a paper. It told why they wanted freedom.
-                </p>
-                <p class="text-sm text-gray-500 mt-2">(This paper is called the <strong>Declaration of Independence</strong>.)</p>
-              </div>
-              <div class="shrink-0">
-                <button class="px-3 py-2 bg-[color:var(--primary-600)] text-white rounded-md shadow-sm" onclick="speakChunk('A long time ago, people in America wrote a paper. It told why they wanted freedom.', true)" aria-label="Read paragraph 1 aloud">🔊 Listen</button>
-              </div>
-            </div>
-
-            <div class="bg-blue-50 p-3 rounded-md flex items-start gap-3">
-              <div class="flex-1">
-                <p id="p2" class="leading-relaxed">
-                  The paper said people are born with rights. That means people have things they should always have.
-                </p>
-                <p class="text-sm text-gray-500 mt-2">(We call these <strong>My Freedoms</strong>.)</p>
-              </div>
-              <div class="shrink-0">
-                <button class="px-3 py-2 bg-[color:var(--primary-600)] text-white rounded-md shadow-sm" onclick="speakChunk('The paper said people are born with rights. That means people have things they should always have.', true)" aria-label="Read paragraph 2 aloud">🔊 Listen</button>
-              </div>
-            </div>
-
-            <div class="bg-blue-50 p-3 rounded-md flex items-start gap-3">
-              <div class="flex-1">
-                <p id="p3" class="leading-relaxed">
-                  The three big freedoms are: <strong>to live</strong>, <strong>to be free</strong>, and <strong>to be happy</strong>.
-                </p>
-              </div>
-              <div class="shrink-0">
-                <button class="px-3 py-2 bg-[color:var(--primary-600)] text-white rounded-md shadow-sm" onclick="speakChunk('The three big freedoms are: to live, to be free, and to be happy.', true)" aria-label="Read paragraph 3 aloud">🔊 Listen</button>
-              </div>
-            </div>
-          </article>
-        </div>
-
-        <!-- Picture glossary -->
-        <aside class="w-44 hidden md:block">
-          <h3 class="font-semibold text-[color:var(--primary-600)] mb-2">Word Help</h3>
-          <ul class="space-y-3 text-sm">
-            <li class="glossary-term relative p-2 rounded-md bg-white border">
-              <strong>Declaration</strong>
-              <div class="tooltip-inner left-0 -top-2 -translate-y-full">
-                <div class="flex items-center gap-2">
-                  <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 24 24' fill='%232563eb'><path d='M3 5h18v2H3zm0 6h18v2H3zm0 6h18v2H3z' /></svg>" alt="" class="w-8 h-8" />
-                  <div>
-                    <p class="font-semibold">Declaration</p>
-                    <p class="text-xs text-gray-600">A paper that tells an important idea.</p>
-                  </div>
-                </div>
-              </div>
-            </li>
-
-            <li class="glossary-term relative p-2 rounded-md bg-white border">
-              <strong>Freedom</strong>
-              <div class="tooltip-inner left-0 -top-2 -translate-y-full">
-                <div class="flex items-center gap-2">
-                  <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 24 24' fill='%23f59e0b'><path d='M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z'/></svg>" alt="" class="w-8 h-8" />
-                  <div>
-                    <p class="font-semibold">Freedom</p>
-                    <p class="text-xs text-gray-600">When you can choose and move safely.</p>
-                  </div>
-                </div>
-              </div>
-            </li>
-
-            <li class="glossary-term relative p-2 rounded-md bg-white border">
-              <strong>Rights</strong>
-              <div class="tooltip-inner left-0 -top-2 -translate-y-full">
-                <div class="flex items-center gap-2">
-                  <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 24 24' fill='%231f2937'><path d='M12 2C7.03 2 3 6.03 3 11c0 5.25 8.25 11 9 11s9-5.75 9-11c0-4.97-4.03-9-9-9z'/></svg>" alt="" class="w-8 h-8" />
-                  <div>
-                    <p class="font-semibold">Rights</p>
-                    <p class="text-xs text-gray-600">Things people should have because they are people.</p>
-                  </div>
-                </div>
-              </div>
-            </li>
-
-          </ul>
-        </aside>
-      </div>
-
-      <!-- Simple comprehension check -->
-      <div class="mt-4">
-        <h3 class="font-semibold text-[color:var(--primary-600)]">Check for Understanding</h3>
-        <p class="text-gray-700 mt-2">What is the "Go-Free Paper"?</p>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
-          <button onclick="checkAnswer(this, true)" class="p-3 bg-white rounded-md border hover:bg-green-50 text-left">The Declaration of Independence</button>
-          <button onclick="checkAnswer(this, false)" class="p-3 bg-white rounded-md border hover:bg-red-50 text-left">A rule book for school</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- Activity 1: Save the Idea Card -->
-    <section class="mb-6">
-      <h2 class="text-2xl font-bold text-[color:var(--primary-600)] mb-2">Activity 1: Save the Idea Card</h2>
-      <p class="text-gray-600 mb-4">Drag the <strong>Idea Card</strong> into the box. We will use this idea later.</p>
-
-      <div class="flex flex-col md:flex-row items-center gap-4">
-        <div id="ideaCard" class="concept-card bg-white p-4 rounded-lg shadow w-full md:w-1/3" draggable="true" data-concept="Natural Rights" aria-grabbed="false" role="img" aria-label="Idea card: My Freedoms">
-          <p class="text-3xl font-extrabold text-[color:var(--accent-500)]">My Freedoms</p>
-          <p class="text-sm text-gray-500 mt-1">(The Declaration)</p>
-        </div>
-
-        <div id="dropTarget" class="bg-gray-50 border-4 border-dashed border-gray-300 p-6 rounded-lg w-full md:w-1/2 h-32 flex items-center justify-center text-gray-500" aria-dropeffect="move">
-          <p id="dropText">Drop the Idea Card here to save it</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- Activity 2: Find the Freedoms -->
-    <section class="mb-6">
-      <h2 class="text-2xl font-bold text-[color:var(--primary-600)] mb-3">Activity 2: Find the Freedoms</h2>
-      <p class="text-gray-600 mb-3">Tap or click the <strong>three pictures</strong> that show a freedom.</p>
-
-      <div id="freedomOptions" class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="freedom-option bg-white p-4 rounded-md text-center" data-correct="true" role="button" tabindex="0" aria-pressed="false">
-          <span class="text-5xl" role="img" aria-label="smiling face">😄</span>
-          <p class="text-sm text-gray-500 mt-2">Being happy</p>
-        </div>
-
-        <div class="freedom-option bg-white p-4 rounded-md text-center" data-correct="false" role="button" tabindex="0" aria-pressed="false">
-          <span class="text-5xl" role="img" aria-label="locked chain">🔒🔗</span>
-          <p class="text-sm text-gray-500 mt-2">Locked up</p>
-        </div>
-
-        <div class="freedom-option bg-white p-4 rounded-md text-center" data-correct="true" role="button" tabindex="0" aria-pressed="false">
-          <span class="text-5xl" role="img" aria-label="child playing">🧸⚽</span>
-          <p class="text-sm text-gray-500 mt-2">Play and fun</p>
-        </div>
-
-        <div class="freedom-option bg-white p-4 rounded-md text-center" data-correct="true" role="button" tabindex="0" aria-pressed="false">
-          <span class="text-5xl" role="img" aria-label="running outside">🏃‍♀️🌳</span>
-          <p class="text-sm text-gray-500 mt-2">Run and move</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- Activity 3: Match the Freedoms -->
-    <section class="mb-6">
-      <h2 class="text-2xl font-bold text-[color:var(--primary-600)] mb-3">Activity 3: Match the Three Freedoms</h2>
-      <p class="text-gray-600 mb-3">Drag each right card to the matching picture and sentence.</p>
-
-      <div id="dragRights" class="flex flex-wrap gap-3 p-4 rounded-md bg-blue-50 mb-4">
-        <div id="drag-live" class="drag-item bg-[color:var(--accent-500)] text-white p-3 rounded-md shadow cursor-grab" draggable="true" data-right="live" role="button" aria-grabbed="false">
-          The Right to LIVE
-        </div>
-
-        <div id="drag-free" class="drag-item bg-[color:var(--primary-600)] text-white p-3 rounded-md shadow cursor-grab" draggable="true" data-right="free" role="button" aria-grabbed="false">
-          The Right to be FREE
-        </div>
-
-        <div id="drag-happy" class="drag-item bg-yellow-400 text-white p-3 rounded-md shadow cursor-grab" draggable="true" data-right="happy" role="button" aria-grabbed="false">
-          The Right to be HAPPY
-        </div>
-      </div>
-
-      <div id="dropDefinitions" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="drop-target p-4 border-4 border-dashed border-yellow-300 rounded-xl text-center flex flex-col items-center justify-center" data-accept="happy" aria-dropeffect="move">
-          <span class="text-4xl mb-2" role="img" aria-label="star">⭐</span>
-          <p class="font-semibold text-gray-700">To set goals and dream</p>
-        </div>
-
-        <div class="drop-target p-4 border-4 border-dashed border-[color:var(--accent-500)] rounded-xl text-center flex flex-col items-center justify-center" data-accept="live" aria-dropeffect="move">
-          <span class="text-4xl mb-2" role="img" aria-label="heart">❤️</span>
-          <p class="font-semibold text-gray-700">To be safe and healthy</p>
-        </div>
-
-        <div class="drop-target p-4 border-4 border-dashed border-[color:var(--primary-400)] rounded-xl text-center flex flex-col items-center justify-center" data-accept="free" aria-dropeffect="move">
-          <span class="text-4xl mb-2" role="img" aria-label="running">🏃</span>
-          <p class="font-semibold text-gray-700">To make choices and move</p>
-        </div>
-      </div>
-
-      <div id="dragDropFeedback" class="text-center mt-4 text-lg font-bold text-gray-600"></div>
-    </section>
-
-    <!-- Activity 4: Draw Your Freedom -->
-    <section class="mb-6">
-      <h2 class="text-2xl font-bold text-[color:var(--primary-600)] mb-3">Activity 4: Draw Your Freedom</h2>
-      <p class="text-gray-600 mb-3">Draw a picture of your favorite freedom. Write a short sentence too.</p>
-
-      <div class="p-4 bg-gray-50 rounded-md">
-        <div class="flex items-center gap-3 mb-3">
-          <label for="penColor" class="font-medium">Pen Color:</label>
-          <input type="color" id="penColor" value="#000000" class="w-10 h-10 rounded-full border" aria-label="Pen color" />
-          <button id="clearButton" class="ml-3 px-3 py-2 bg-[color:var(--primary-600)] text-white rounded-md">Clear</button>
-
-          <button id="saveImageBtn" class="ml-auto px-3 py-2 bg-[color:var(--accent-500)] text-white rounded-md" title="Save drawing as image">Save Image</button>
-        </div>
-
-        <canvas id="drawingCanvas" class="border rounded-md bg-white" aria-label="Drawing pad area"></canvas>
-
-        <label for="freedomLabel" class="block text-gray-700 font-medium mt-4 mb-2">My favorite freedom is:</label>
-        <input type="text" id="freedomLabel" class="w-full p-3 border border-gray-300 rounded-md" placeholder="Example: playing outside with friends" />
-      </div>
-    </section>
-
-    <!-- Optional stretch -->
-    <section class="mb-6">
-      <div class="bg-blue-50 p-4 rounded-md border-l-4 border-[color:var(--primary-600)]">
-        <h3 class="font-bold text-[color:var(--primary-600)]">💭 Think Hard (optional)</h3>
-        <p class="text-gray-700 mt-2">Why do you think people wanted to make their own rules? Say one reason in your own words.</p>
-        <button class="mt-3 px-3 py-2 bg-white border rounded-md" onclick="speakChunk('Why do you think people wanted to make their own rules? Say one reason in your own words.', true)">🔊 Listen</button>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- feedback box (centered) -->
-  <div id="feedbackBox" class="feedback" role="status" aria-live="polite"></div>
-
-  <script>
-    /***********************
-      Speech synthesis helpers
-    ***********************/
-    let chosenVoice = null;
-    const preferLang = 'en-US'; // neutral American English
-    const synth = window.speechSynthesis;
-
-    function pickVoice() {
-      // pick best matching voice with en-US if available
-      const voices = synth.getVoices();
-      if (!voices || voices.length === 0) return null;
-
-      // try to find common names for a neutral en-US voice
-      const candidates = voices.filter(v => v.lang && v.lang.startsWith(preferLang));
-
-      // prefer female/neutral voice names commonly available
-      const preferNames = ['Google US English', 'Alex', 'Samantha', 'Daniel', 'Microsoft Zira', 'Alloy', 'en-US'];
-      for (const name of preferNames) {
-        const v = candidates.find(x => x.name && x.name.toLowerCase().includes(name.toLowerCase()));
-        if (v) {
-          chosenVoice = v;
-          return v;
-        }
-      }
-      // fallback to first en-US voice, or first voice overall
-      chosenVoice = candidates[0] || voices[0];
-      return chosenVoice;
-    }
-
-    // some browsers load voices asynchronously
-    function ensureVoiceReady() {
-      return new Promise(resolve => {
-        let voices = synth.getVoices();
-        if (voices.length) {
-          pickVoice();
-          resolve();
-          return;
-        }
-        // wait for voiceschanged event
-        synth.addEventListener('voiceschanged', () => {
-          pickVoice();
-          resolve();
-        });
-        // fallback timeout
-        setTimeout(() => { pickVoice(); resolve(); }, 1000);
-      });
-    }
-
-    function speakChunk(text, slow = true) {
-      if (!('speechSynthesis' in window)) {
-        showFeedback('Audio not supported in this browser', 'bg-gray-600');
-        return;
-      }
-      ensureVoiceReady().then(() => {
-        const u = new SpeechSynthesisUtterance(text);
-        u.rate = slow ? 0.9 : 1.0; // slightly slower for readability
-        u.pitch = 1.0;
-        if (chosenVoice) u.voice = chosenVoice;
-        u.lang = preferLang;
-        synth.cancel(); // stop previous
-        synth.speak(u);
-      });
-    }
-
-    /***********************
-      Small UI feedback helper
-    ***********************/
-    const feedbackBox = document.getElementById('feedbackBox');
-    function showFeedback(message, bgClass) {
-      feedbackBox.textContent = message;
-      feedbackBox.style.display = 'block';
-      // simple color mapping based on class-like name
-      if (bgClass === 'bg-green-500') {
-        feedbackBox.style.background = '#10b981';
-      } else if (bgClass === 'bg-red-500') {
-        feedbackBox.style.background = '#ef4444';
-      } else if (bgClass === 'bg-gray-500') {
-        feedbackBox.style.background = '#6b7280';
-      } else if (bgClass === 'bg-blue-500') {
-        feedbackBox.style.background = '#2563eb';
-      } else {
-        feedbackBox.style.background = '#111827';
-      }
-      setTimeout(() => { feedbackBox.style.display = 'none'; }, 1400);
-    }
-
-    /***********************
-      Comprehension check
-    ***********************/
-    function checkAnswer(button, correct) {
-      // style the chosen button
-      const parent = button.parentElement;
-      Array.from(parent.children).forEach(b => {
-        b.classList.remove('bg-green-50', 'bg-red-50');
-      });
-      if (correct) {
-        button.classList.add('bg-green-50');
-        showFeedback('✔️ Great job!', 'bg-green-500');
-      } else {
-        button.classList.add('bg-red-50');
-        showFeedback('❌ Try again!', 'bg-red-500');
-      }
-    }
-
-    /***********************
-      Drag & Drop: Idea Card
-    ***********************/
-    const card = document.getElementById('ideaCard');
-    const dropTarget = document.getElementById('dropTarget');
-    const dropText = document.getElementById('dropText');
-
-    card.addEventListener('dragstart', (e) => {
-      e.dataTransfer.setData('text/plain', e.target.dataset.concept);
-      card.setAttribute('aria-grabbed', 'true');
-      card.classList.add('opacity-60');
-    });
-
-    card.addEventListener('dragend', (e) => {
-      card.setAttribute('aria-grabbed', 'false');
-      card.classList.remove('opacity-60');
-    });
-
-    dropTarget.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      dropTarget.classList.add('bg-blue-50', 'border-[color:var(--primary-600)]');
-    });
-
-    dropTarget.addEventListener('dragleave', () => {
-      dropTarget.classList.remove('bg-blue-50', 'border-[color:var(--primary-600)]');
-    });
-
-    dropTarget.addEventListener('drop', (e) => {
-      e.preventDefault();
-      dropTarget.classList.remove('bg-blue-50', 'border-[color:var(--primary-600)]');
-      const data = e.dataTransfer.getData('text/plain');
-      if (data === 'Natural Rights') {
-        card.style.display = 'none';
-        dropTarget.classList.add('bg-green-50', 'border-green-400');
-        dropText.innerHTML = `<span class="text-green-700 font-bold">CARD SAVED!</span><br>${data} — Ready for Day 5!`;
-        showFeedback('Card Saved!', 'bg-green-500');
-      } else {
-        showFeedback('Wrong card! Try again.', 'bg-red-500');
-      }
-    });
-
-    /***********************
-      Activity 2: Select Pictures
-    ***********************/
-    const freedomOptions = document.querySelectorAll('.freedom-option');
-    const totalCorrectA2 = 3;
-    freedomOptions.forEach(option => {
-      // click and keyboard support
-      const selectToggle = () => {
-        const isSelected = option.classList.contains('selected');
-        if (!isSelected) {
-          option.classList.add('selected');
-          option.setAttribute('aria-pressed', 'true');
-        } else {
-          option.classList.remove('selected');
-          option.setAttribute('aria-pressed', 'false');
-        }
-        checkCompletionA2();
-      };
-      option.addEventListener('click', selectToggle);
-      option.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          selectToggle();
-        }
-      });
-    });
-
-    function checkCompletionA2() {
-      let correctSelections = 0;
-      let incorrectSelections = 0;
-      freedomOptions.forEach(option => {
-        if (option.classList.contains('selected')) {
-          if (option.dataset.correct === 'true') correctSelections++;
-          else incorrectSelections++;
-        }
-      });
-      if (correctSelections === totalCorrectA2 && incorrectSelections === 0) {
-        showFeedback('Activity 2 Complete!', 'bg-blue-500');
-      } else if (incorrectSelections > 0) {
-        // gentle hint
-        showFeedback('One choice is wrong. Check again.', 'bg-red-500');
-      }
-    }
-
-    /***********************
-      Activity 3: Drag & Drop Matching
-    ***********************/
-    const dragItems = document.querySelectorAll('.drag-item');
-    const dropTargets = document.querySelectorAll('.drop-target');
-    let correctDrops = 0;
-    const totalDrops = 3;
-
-    dragItems.forEach(item => {
-      item.addEventListener('dragstart', (e) => {
-        e.dataTransfer.setData('text/plain', e.target.dataset.right);
-        item.classList.add('dragging');
-        item.setAttribute('aria-grabbed', 'true');
-      });
-      item.addEventListener('dragend', (e) => {
-        item.classList.remove('dragging');
-        item.setAttribute('aria-grabbed', 'false');
-      });
-    });
-
-    dropTargets.forEach(target => {
-      target.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        target.classList.add('drag-over');
-      });
-      target.addEventListener('dragleave', () => {
-        target.classList.remove('drag-over');
-      });
-      target.addEventListener('drop', (e) => {
-        e.preventDefault();
-        target.classList.remove('drag-over');
-        const draggedRight = e.dataTransfer.getData('text/plain');
-        const acceptedRight = target.dataset.accept;
-        const droppedElement = document.querySelector('[data-right="' + draggedRight + '"]');
-
-        if (draggedRight === acceptedRight && !target.classList.contains('dropped')) {
-          target.classList.add('dropped');
-          droppedElement.classList.remove('bg-[color:var(--accent-500)]','bg-[color:var(--primary-600)]','bg-yellow-400');
-          droppedElement.classList.add('bg-green-500','shadow-none','p-2');
-          droppedElement.style.margin = '4px auto';
-          droppedElement.style.cursor = 'default';
-          droppedElement.draggable = false;
-          target.innerHTML = '';
-          target.appendChild(droppedElement);
-          correctDrops++;
-          showFeedback('Correct Match!', 'bg-green-500');
-          if (correctDrops === totalDrops) {
-            const feedbackArea = document.getElementById('dragDropFeedback');
-            feedbackArea.textContent = "All Three Freedoms Matched! Great work on Day 1!";
-            feedbackArea.classList.add('text-[color:var(--primary-600)]');
-          }
-        } else if (draggedRight !== acceptedRight) {
-          showFeedback('Wrong Match! Try again.', 'bg-red-500');
-        }
-      });
-    });
-
-    /***********************
-      Drawing pad (canvas)
-    ***********************/
-    const canvas = document.getElementById('drawingCanvas');
+  // Canvas drawing setup
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
     const ctx = canvas.getContext('2d');
-    const clearButton = document.getElementById('clearButton');
-    const penColorInput = document.getElementById('penColor');
-    const saveImageBtn = document.getElementById('saveImageBtn');
+    if (!ctx) return;
+    
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = 240;
+    
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }, []);
 
-    let isDrawing = false;
-    let lastX = 0;
-    let lastY = 0;
-    let currentColor = penColorInput.value;
-
-    function resizeCanvas() {
-      // maintain CSS size but set backing size for crispness
-      const rect = canvas.getBoundingClientRect();
-      canvas.width = Math.floor(rect.width * devicePixelRatio);
-      canvas.height = Math.floor(rect.height * devicePixelRatio);
-      ctx.scale(devicePixelRatio, devicePixelRatio);
-      // fill background white
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, rect.width, rect.height);
-      // default styles
-      ctx.lineWidth = 5;
-      ctx.lineJoin = 'round';
-      ctx.lineCap = 'round';
-    }
-
-    // set an initial CSS height so the canvas has layout space
-    canvas.style.height = '240px';
-    canvas.style.width = '100%';
-
-    window.addEventListener('load', () => { resizeCanvas(); });
-    window.addEventListener('resize', () => { 
-      // save drawing optionally? For now, clear on resize to keep simple
-      resizeCanvas();
-    });
-
-    penColorInput.addEventListener('input', (e) => { currentColor = e.target.value; });
-
-    clearButton.addEventListener('click', () => {
-      const rect = canvas.getBoundingClientRect();
-      ctx.clearRect(0, 0, rect.width, rect.height);
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, rect.width, rect.height);
-      showFeedback('Canvas cleared', 'bg-gray-500');
-    });
-
-    function getPos(e) {
-      const rect = canvas.getBoundingClientRect();
-      let clientX, clientY;
-      if (e.touches && e.touches.length > 0) {
-        clientX = e.touches[0].clientX;
-        clientY = e.touches[0].clientY;
-      } else {
-        clientX = e.clientX;
-        clientY = e.clientY;
-      }
-      return { x: clientX - rect.left, y: clientY - rect.top };
-    }
-
-    function draw(e) {
-      if (!isDrawing) return;
-      e.preventDefault();
-      const pos = getPos(e);
+  const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+    setIsDrawing(true);
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const rect = canvas.getBoundingClientRect();
+    const x = 'touches' in e ? e.touches[0].clientX - rect.left : e.clientX - rect.left;
+    const y = 'touches' in e ? e.touches[0].clientY - rect.top : e.clientY - rect.top;
+    
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
       ctx.beginPath();
-      ctx.strokeStyle = currentColor;
-      ctx.moveTo(lastX, lastY);
-      ctx.lineTo(pos.x, pos.y);
+      ctx.moveTo(x, y);
+    }
+  };
+
+  const draw = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+    if (!isDrawing) return;
+    
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const rect = canvas.getBoundingClientRect();
+    const x = 'touches' in e ? e.touches[0].clientX - rect.left : e.clientX - rect.left;
+    const y = 'touches' in e ? e.touches[0].clientY - rect.top : e.clientY - rect.top;
+    
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.strokeStyle = penColor;
+      ctx.lineWidth = 3;
+      ctx.lineCap = 'round';
+      ctx.lineTo(x, y);
       ctx.stroke();
-      lastX = pos.x; lastY = pos.y;
     }
+  };
 
-    function startDrawing(e) {
-      isDrawing = true;
-      const pos = getPos(e);
-      lastX = pos.x; lastY = pos.y;
+  const stopDrawing = () => {
+    setIsDrawing(false);
+  };
+
+  const clearCanvas = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.fillStyle = 'white';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
+  };
 
-    function stopDrawing() {
-      isDrawing = false;
+  const saveDrawing = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const link = document.createElement('a');
+    link.download = 'my-freedom-drawing.png';
+    link.href = canvas.toDataURL();
+    link.click();
+    toast.success('Drawing saved!');
+  };
+
+  const checkAnswer = (correct: boolean) => {
+    if (correct) {
+      toast.success('Correct! Great job!');
+    } else {
+      toast.error('Not quite. Try again!');
     }
+  };
 
-    // mouse
-    canvas.addEventListener('mousedown', startDrawing);
-    canvas.addEventListener('mousemove', draw);
-    canvas.addEventListener('mouseup', stopDrawing);
-    canvas.addEventListener('mouseout', stopDrawing);
-    // touch
-    canvas.addEventListener('touchstart', startDrawing, {passive:false});
-    canvas.addEventListener('touchmove', draw, {passive:false});
-    canvas.addEventListener('touchend', stopDrawing);
+  const toggleFreedom = (index: number, correct: boolean) => {
+    const newSelected = new Set(selectedFreedoms);
+    if (newSelected.has(index)) {
+      newSelected.delete(index);
+    } else {
+      newSelected.add(index);
+    }
+    setSelectedFreedoms(newSelected);
 
-    // Save as image
-    saveImageBtn.addEventListener('click', () => {
-      const rect = canvas.getBoundingClientRect();
-      // create a new canvas to export with desired pixel ratio
-      const exportCanvas = document.createElement('canvas');
-      exportCanvas.width = rect.width;
-      exportCanvas.height = rect.height;
-      const exportCtx = exportCanvas.getContext('2d');
-      // paint white background
-      exportCtx.fillStyle = '#ffffff';
-      exportCtx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
-      // draw current canvas content
-      // we need to draw from the display canvas; easiest way: use toDataURL from original
-      try {
-        const dataURL = canvas.toDataURL('image/png');
-        const link = document.createElement('a');
-        link.href = dataURL;
-        link.download = 'my_freedom_drawing.png';
-        link.click();
-      } catch (err) {
-        showFeedback('Cannot save image in this browser', 'bg-gray-500');
+    if (newSelected.size === 3 && Array.from(newSelected).every(i => {
+      const freedoms = [true, false, true, true];
+      return freedoms[i];
+    })) {
+      setTimeout(() => {
+        toast.success('Perfect! You found all three freedoms!');
+        setActivity2Complete(true);
+      }, 300);
+    }
+  };
+
+  const freedomOptions = [
+    { emoji: '😄', label: 'Being happy', correct: true },
+    { emoji: '🔒🔗', label: 'Locked up', correct: false },
+    { emoji: '🧸⚽', label: 'Play and fun', correct: true },
+    { emoji: '🏃‍♀️🌳', label: 'Run and move', correct: true },
+  ];
+
+  const rights = [
+    { id: 'live', label: 'The Right to LIVE', color: 'bg-accent text-accent-foreground' },
+    { id: 'free', label: 'The Right to be FREE', color: 'bg-primary text-primary-foreground' },
+    { id: 'happy', label: 'The Right to be HAPPY', color: 'bg-yellow-400 text-white' },
+  ];
+
+  const definitions = [
+    { accept: 'happy', emoji: '⭐', text: 'To set goals and dream', border: 'border-yellow-400' },
+    { accept: 'live', emoji: '❤️', text: 'To be safe and healthy', border: 'border-accent' },
+    { accept: 'free', emoji: '🏃', text: 'To make choices and move', border: 'border-primary' },
+  ];
+
+  const handleDragStart = (e: React.DragEvent, rightId: string) => {
+    setDraggedRight(rightId);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDrop = (e: React.DragEvent, accept: string) => {
+    e.preventDefault();
+    if (draggedRight === accept) {
+      const newDroppedRights = { ...droppedRights, [accept]: draggedRight };
+      setDroppedRights(newDroppedRights);
+      toast.success('Great match!');
+      
+      if (Object.keys(newDroppedRights).length === 3) {
+        setTimeout(() => {
+          toast.success('Perfect! You matched all three freedoms!');
+          setActivity3Complete(true);
+        }, 300);
       }
-    });
+    } else {
+      toast.error('Not quite. Try a different match!');
+    }
+    setDraggedRight(null);
+  };
 
-    /***********************
-      Initialize some things on startup
-    ***********************/
-    // call ensure voice
-    ensureVoiceReady().then(() => {
-      // no UI change needed but voice should be selected if available
-    });
+  // Activity 1: Declaration Concepts Matching
+  const declarationConcepts = [
+    { id: 'equal', label: 'All people are equal', color: 'bg-primary text-primary-foreground' },
+    { id: 'rights', label: 'Rights from birth', color: 'bg-accent text-accent-foreground' },
+    { id: 'govern', label: 'Government serves people', color: 'bg-purple-500 text-white' },
+    { id: 'change', label: 'Can change bad rulers', color: 'bg-orange-500 text-white' },
+  ];
 
-  </script>
-</body>
-</html>
+  const declarationDefinitions = [
+    { accept: 'equal', emoji: '👥', text: 'Everyone is the same', border: 'border-primary' },
+    { accept: 'rights', emoji: '🎁', text: 'Born with freedoms', border: 'border-accent' },
+    { accept: 'govern', emoji: '🤝', text: 'Leaders help us', border: 'border-purple-500' },
+    { accept: 'change', emoji: '✋', text: 'Pick new leaders', border: 'border-orange-500' },
+  ];
+
+  const handleConceptDragStart = (e: React.DragEvent, conceptId: string) => {
+    setDraggedConcept(conceptId);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleConceptDrop = (e: React.DragEvent, accept: string) => {
+    e.preventDefault();
+    if (draggedConcept === accept) {
+      const newMatched = { ...matchedConcepts, [accept]: draggedConcept };
+      setMatchedConcepts(newMatched);
+      toast.success('Great match!');
+      
+      if (Object.keys(newMatched).length === 4) {
+        setTimeout(() => {
+          toast.success('Perfect! You matched all four key ideas!');
+          setActivity1Complete(true);
+        }, 300);
+      }
+    } else {
+      toast.error('Not quite. Try a different match!');
+    }
+    setDraggedConcept(null);
+  };
+
+  const downloadCertificate = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 800;
+    canvas.height = 600;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Background
+    ctx.fillStyle = '#f8f9fa';
+    ctx.fillRect(0, 0, 800, 600);
+    
+    // Border
+    ctx.strokeStyle = '#3b82f6';
+    ctx.lineWidth = 20;
+    ctx.strokeRect(20, 20, 760, 560);
+    
+    // Title
+    ctx.fillStyle = '#1e40af';
+    ctx.font = 'bold 48px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('Certificate of Completion', 400, 120);
+    
+    // Subtitle
+    ctx.font = '32px Arial';
+    ctx.fillStyle = '#4b5563';
+    ctx.fillText('Day 1: My Freedoms', 400, 180);
+    
+    // Student section
+    ctx.font = '24px Arial';
+    ctx.fillText('This certifies that', 400, 280);
+    
+    // Student name line
+    ctx.strokeStyle = '#6b7280';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(250, 340);
+    ctx.lineTo(550, 340);
+    ctx.stroke();
+    ctx.fillText('Student Name', 400, 335);
+    
+    // Completion text
+    ctx.fillText('has successfully completed all activities', 400, 400);
+    ctx.fillText('about the Declaration of Independence', 400, 440);
+    
+    // Date
+    ctx.font = '20px Arial';
+    const today = new Date().toLocaleDateString();
+    ctx.fillText(`Date: ${today}`, 400, 520);
+
+    // Download
+    const link = document.createElement('a');
+    link.download = 'day1-certificate.png';
+    link.href = canvas.toDataURL();
+    link.click();
+    toast.success('Certificate downloaded!');
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  return (
+    <div className="min-h-screen bg-background py-8 px-4 md:px-8">
+      <header className="text-center mb-8">
+        <h1 className="text-4xl md:text-5xl font-extrabold text-primary mb-2">
+          Day 1: My Freedoms
+        </h1>
+        <p className="text-xl text-muted-foreground">
+          A simple lesson about the Declaration of Independence
+        </p>
+      </header>
+
+      <main className="max-w-5xl mx-auto space-y-8">
+        {/* I CAN Goals */}
+        <Card className="bg-accent-light border-l-4 border-accent p-6">
+          <p className="font-bold text-xl mb-3">🌟 Today I Can:</p>
+          <ul className="list-disc ml-8 text-lg space-y-2 text-foreground">
+            <li>Say what the "Go-Free Paper" is.</li>
+            <li>Name three freedoms people have.</li>
+            <li>Draw a picture of a freedom I like.</li>
+          </ul>
+        </Card>
+
+        {/* Reading Section */}
+        <section className="space-y-4">
+          <h2 className="text-3xl font-bold text-primary">Reading: The Go-Free Paper</h2>
+          
+          <div className="space-y-4">
+            <Card className="bg-primary-light p-5">
+              <div className="flex items-start gap-4">
+                <div className="flex-1">
+                  <p className="text-lg leading-relaxed mb-3">
+                    A long time ago, people in America wrote a paper. It told why they wanted freedom.
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    (This paper is called the <strong>Declaration of Independence</strong>.)
+                  </p>
+                </div>
+                <Button 
+                  onClick={() => speak('A long time ago, people in America wrote a paper. It told why they wanted freedom.')}
+                  size="lg"
+                  className="shrink-0"
+                >
+                  <Volume2 className="w-5 h-5" />
+                </Button>
+              </div>
+            </Card>
+
+            <Card className="bg-primary-light p-5">
+              <div className="flex items-start gap-4">
+                <div className="flex-1">
+                  <p className="text-lg leading-relaxed mb-3">
+                    The paper said people are born with rights. That means people have things they should always have.
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    (We call these <strong>My Freedoms</strong>.)
+                  </p>
+                </div>
+                <Button 
+                  onClick={() => speak('The paper said people are born with rights. That means people have things they should always have.')}
+                  size="lg"
+                  className="shrink-0"
+                >
+                  <Volume2 className="w-5 h-5" />
+                </Button>
+              </div>
+            </Card>
+
+            <Card className="bg-primary-light p-5">
+              <div className="flex items-start gap-4">
+                <div className="flex-1">
+                  <p className="text-lg leading-relaxed">
+                    The three big freedoms are: <strong>to live</strong>, <strong>to be free</strong>, and <strong>to be happy</strong>.
+                  </p>
+                </div>
+                <Button 
+                  onClick={() => speak('The three big freedoms are: to live, to be free, and to be happy.')}
+                  size="lg"
+                  className="shrink-0"
+                >
+                  <Volume2 className="w-5 h-5" />
+                </Button>
+              </div>
+            </Card>
+          </div>
+
+          {/* Comprehension Check */}
+          <div className="mt-6">
+            <h3 className="font-semibold text-xl text-primary mb-3">Check for Understanding</h3>
+            <p className="text-lg text-foreground mb-4">What is the "Go-Free Paper"?</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Button
+                onClick={() => checkAnswer(true)}
+                variant="outline"
+                size="lg"
+                className="h-auto p-5 text-left justify-start text-lg hover:bg-success-light hover:border-success"
+              >
+                The Declaration of Independence
+              </Button>
+              <Button
+                onClick={() => checkAnswer(false)}
+                variant="outline"
+                size="lg"
+                className="h-auto p-5 text-left justify-start text-lg hover:bg-destructive/10 hover:border-destructive"
+              >
+                A rule book for school
+              </Button>
+            </div>
+          </div>
+        </section>
+
+        {/* Activity 1: Declaration Key Ideas Matching */}
+        <section>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-3xl font-bold text-primary">Activity 1: Match the Big Ideas</h2>
+            {activity1Complete && (
+              <span className="text-success text-xl font-bold">✓ Complete</span>
+            )}
+          </div>
+          <p className="text-lg text-muted-foreground mb-6">
+            Drag each <strong>big idea</strong> to the simple words that mean the same thing.
+          </p>
+
+          <div className="flex flex-wrap gap-4 p-6 rounded-xl bg-primary-light mb-6">
+            {declarationConcepts.map((concept) => (
+              !matchedConcepts[concept.id] && (
+                <div
+                  key={concept.id}
+                  draggable
+                  onDragStart={(e) => handleConceptDragStart(e, concept.id)}
+                  className={`${concept.color} px-6 py-4 rounded-lg shadow-md cursor-grab active:cursor-grabbing hover:scale-105 transition-all font-semibold text-lg`}
+                >
+                  {concept.label}
+                </div>
+              )
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {declarationDefinitions.map((def) => (
+              <div
+                key={def.accept}
+                onDragOver={handleDragOver}
+                onDrop={(e) => handleConceptDrop(e, def.accept)}
+                className={`border-4 border-dashed ${def.border} rounded-xl p-6 min-h-[180px] flex flex-col items-center justify-center text-center transition-all ${
+                  matchedConcepts[def.accept] 
+                    ? 'bg-success-light border-success' 
+                    : 'hover:bg-primary-light/30'
+                }`}
+              >
+                <span className="text-5xl mb-4" role="img">{def.emoji}</span>
+                <p className="font-semibold text-xl mb-2">{def.text}</p>
+                {matchedConcepts[def.accept] && (
+                  <p className="text-sm text-success font-bold mt-2">✓ Matched!</p>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Activity 2: Find the Freedoms */}
+        <section>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-3xl font-bold text-primary">Activity 2: Find the Freedoms</h2>
+            {activity2Complete && (
+              <span className="text-success text-xl font-bold">✓ Complete</span>
+            )}
+          </div>
+          <p className="text-lg text-muted-foreground mb-6">
+            Tap or click the <strong>three pictures</strong> that show a freedom.
+          </p>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {freedomOptions.map((option, index) => (
+              <Card
+                key={index}
+                onClick={() => toggleFreedom(index, option.correct)}
+                className={`p-6 text-center cursor-pointer transition-all hover:scale-105 ${
+                  selectedFreedoms.has(index)
+                    ? option.correct
+                      ? 'bg-success-light border-success border-4'
+                      : 'bg-destructive/10 border-destructive border-4'
+                    : 'hover:shadow-md'
+                }`}
+              >
+                <span className="text-6xl block mb-3" role="img">{option.emoji}</span>
+                <p className="text-base text-muted-foreground">{option.label}</p>
+              </Card>
+            ))}
+          </div>
+        </section>
+
+        {/* Activity 3: Match the Freedoms */}
+        <section>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-3xl font-bold text-primary">Activity 3: Match the Three Freedoms</h2>
+            {activity3Complete && (
+              <span className="text-success text-xl font-bold">✓ Complete</span>
+            )}
+          </div>
+          <p className="text-lg text-muted-foreground mb-6">
+            Drag each right card to the matching picture and sentence.
+          </p>
+
+          <div className="flex flex-wrap gap-4 p-6 rounded-xl bg-primary-light mb-6">
+            {rights.map((right) => (
+              !droppedRights[right.id] && (
+                <div
+                  key={right.id}
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, right.id)}
+                  className={`${right.color} px-6 py-4 rounded-lg shadow-md cursor-grab active:cursor-grabbing hover:scale-105 transition-all font-semibold text-lg`}
+                >
+                  {right.label}
+                </div>
+              )
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {definitions.map((def) => (
+              <div
+                key={def.accept}
+                onDragOver={handleDragOver}
+                onDrop={(e) => handleDrop(e, def.accept)}
+                className={`border-4 border-dashed ${def.border} rounded-xl p-6 min-h-[200px] flex flex-col items-center justify-center text-center transition-all ${
+                  droppedRights[def.accept] 
+                    ? 'bg-success-light border-success' 
+                    : 'hover:bg-primary-light/30'
+                }`}
+              >
+                <span className="text-5xl mb-4" role="img">{def.emoji}</span>
+                <p className="font-semibold text-lg mb-2">{def.text}</p>
+                {droppedRights[def.accept] && (
+                  <p className="text-sm text-success font-bold mt-2">✓ Matched!</p>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Activity 4: Draw Your Freedom */}
+        <section>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-3xl font-bold text-primary">Activity 4: Draw Your Freedom</h2>
+            {activity4Complete && (
+              <span className="text-success text-xl font-bold">✓ Complete</span>
+            )}
+          </div>
+          <p className="text-lg text-muted-foreground mb-6">
+            Draw a picture of your favorite freedom. Write a short sentence too.
+          </p>
+
+          <Card className="p-6 space-y-4">
+            <div className="flex items-center gap-4 flex-wrap">
+              <label htmlFor="penColor" className="font-medium text-lg">Pen Color:</label>
+              <input
+                type="color"
+                id="penColor"
+                value={penColor}
+                onChange={(e) => setPenColor(e.target.value)}
+                className="w-14 h-14 rounded-lg border-2 cursor-pointer"
+              />
+              <Button onClick={clearCanvas} variant="outline" size="lg">
+                <Trash2 className="w-5 h-5 mr-2" />
+                Clear
+              </Button>
+              <Button onClick={saveDrawing} className="ml-auto" size="lg">
+                <Save className="w-5 h-5 mr-2" />
+                Save Image
+              </Button>
+            </div>
+
+            <canvas
+              ref={canvasRef}
+              onMouseDown={startDrawing}
+              onMouseMove={draw}
+              onMouseUp={stopDrawing}
+              onMouseLeave={stopDrawing}
+              onTouchStart={startDrawing}
+              onTouchMove={draw}
+              onTouchEnd={stopDrawing}
+              className="border-2 rounded-lg bg-white w-full cursor-crosshair touch-none"
+              style={{ height: '240px' }}
+            />
+
+            <div>
+              <label htmlFor="freedomLabel" className="block text-lg font-medium mb-3">
+                My favorite freedom is:
+              </label>
+              <Input
+                id="freedomLabel"
+                value={freedomText}
+                onChange={(e) => {
+                  setFreedomText(e.target.value);
+                  if (e.target.value.trim().length > 0) {
+                    setActivity4Complete(true);
+                  }
+                }}
+                placeholder="Example: playing outside with friends"
+                className="text-lg p-6"
+              />
+            </div>
+          </Card>
+        </section>
+
+        {/* Optional Stretch */}
+        <Card className="bg-primary-light border-l-4 border-primary p-6">
+          <h3 className="font-bold text-primary text-xl mb-3">💭 Think Hard (optional)</h3>
+          <p className="text-lg text-foreground mb-4">
+            Why do you think people wanted to make their own rules? Say one reason in your own words.
+          </p>
+          <Button 
+            onClick={() => speak('Why do you think people wanted to make their own rules? Say one reason in your own words.')}
+            variant="outline"
+            size="lg"
+          >
+            <Volume2 className="w-5 h-5 mr-2" />
+            Listen
+          </Button>
+        </Card>
+
+        {/* Finish Button - Only shows when all activities are complete */}
+        {activity1Complete && activity2Complete && activity3Complete && activity4Complete && (
+          <Card className="bg-success-light border-4 border-success p-8 text-center">
+            <h3 className="text-3xl font-bold text-success mb-4">🎉 Amazing Work!</h3>
+            <p className="text-xl text-foreground mb-6">
+              You completed all activities! Download your certificate to submit to your teacher.
+            </p>
+            <Button 
+              onClick={downloadCertificate}
+              size="lg"
+              className="text-xl px-8 py-6"
+            >
+              Download Certificate
+            </Button>
+          </Card>
+        )}
+      </main>
+    </div>
+  );
+};
+
+export default Day1;
