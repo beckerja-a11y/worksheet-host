@@ -1,397 +1,381 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!-- NOTE: This is the code from history that links back to the index page. -->
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="2575.7">
-  <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; -webkit-text-stroke: #000000}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; -webkit-text-stroke: #000000; min-height: 14.0px}
-    span.s1 {font-kerning: none}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day 1: My Freedoms (Natural Rights)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+        }
+        .concept-card { cursor: grab; transition: transform 0.2s, box-shadow 0.2s; border: 4px solid #ef4444; }
+        .concept-card:active { cursor: grabbing; box-shadow: 0 10px 20px rgba(239, 68, 68, 0.4); transform: scale(1.05); }
+        .freedom-option { transition: all 0.2s; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .freedom-option:hover { transform: scale(1.05); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+        .selected { border: 4px solid #10b981; background-color: #d1fae5; }
+        .drag-item { cursor: grab; transition: opacity 0.2s; min-width: 100px; }
+        .drag-item.dragging { opacity: 0.5; }
+        .drop-target { background-color: #fefefe; transition: background-color 0.2s, border-color 0.2s; min-height: 180px; }
+        .drop-target.drag-over { background-color: #ffe4e6; border-color: #ef4444; }
+        .drop-target.dropped { border-color: #10b981 !important; background-color: #d1fae5; }
+        .feedback { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); padding: 20px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); z-index: 1000; }
+        #drawingCanvas { width: 100%; height: 250px; }
+    </style>
 </head>
-<body>
-<p class="p1"><span class="s1">&lt;!DOCTYPE html&gt;</span></p>
-<p class="p1"><span class="s1">&lt;html lang="en"&gt;</span></p>
-<p class="p1"><span class="s1">&lt;head&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;meta charset="UTF-8"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;title&gt;Day 1: My Freedoms (Natural Rights)&lt;/title&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script src="https://cdn.tailwindcss.com"&gt;&lt;/script&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;style&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&amp;display=swap');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>body {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>font-family: 'Inter', sans-serif;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>background-color: #f0f4f8;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.concept-card { cursor: grab; transition: transform 0.2s, box-shadow 0.2s; border: 4px solid #ef4444; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.concept-card:active { cursor: grabbing; box-shadow: 0 10px 20px rgba(239, 68, 68, 0.4); transform: scale(1.05); }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.freedom-option { transition: all 0.2s; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.freedom-option:hover { transform: scale(1.05); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.selected { border: 4px solid #10b981; background-color: #d1fae5; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.drag-item { cursor: grab; transition: opacity 0.2s; min-width: 100px; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.drag-item.dragging { opacity: 0.5; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.drop-target { background-color: #fefefe; transition: background-color 0.2s, border-color 0.2s; min-height: 180px; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.drop-target.drag-over { background-color: #ffe4e6; border-color: #ef4444; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.drop-target.dropped { border-color: #10b981 !important; background-color: #d1fae5; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.feedback { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); padding: 20px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); z-index: 1000; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>#drawingCanvas { width: 100%; height: 250px; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/style&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/head&gt;</span></p>
-<p class="p1"><span class="s1">&lt;body class="p-4 md:p-8"&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;header class="text-center mb-8"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;h1 class="text-4xl font-bold text-red-600 mb-2"&gt;Day 1: My Freedoms (Natural Rights)&lt;/h1&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;p class="text-xl text-gray-700"&gt;The "Go-Free" Paper: The Declaration of Independence&lt;/p&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/header&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;main class="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-2xl"&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;section class="mb-8 border-b-4 border-red-200 pb-4"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;h2 class="text-2xl font-bold text-gray-800 mb-4"&gt;Reading: The Declaration and My Freedoms&lt;/h2&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div class="space-y-4 text-lg text-gray-700 leading-relaxed"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;p&gt;Long ago, we wrote a special paper called the **Declaration of Independence**. This paper was important because it said we wanted to be **free** from a big King's rules. This paper is the "Go-Free" Paper!&lt;/p&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;p class="p-3 bg-red-50 rounded-lg border-l-4 border-red-500 font-semibold"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>The paper says that every person is born with special gifts. These are gifts from nature, not from a government. We call these gifts **My Freedoms** (or Natural Rights).</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/p&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;p&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>What are **My Freedoms**? They are the right to **Live**, the right to be **Free**, and the right to feel **Happy**. No boss can take these basic freedoms away!</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/p&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/section&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;section class="mb-10"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;h2 class="text-2xl font-bold text-gray-800 mb-4"&gt;Activity 1: Save the Idea Card&lt;/h2&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;p class="text-gray-600 mb-4"&gt;Drag the **Red Idea Card** into the collection box. You will need this card on Day 5!&lt;/p&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div class="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div id="ideaCard" class="concept-card bg-red-100 p-4 rounded-lg text-center shadow-lg w-full md:w-1/3" draggable="true" data-concept="Natural Rights"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;p class="text-4xl font-extrabold text-red-600"&gt;My Freedoms&lt;/p&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;p class="text-sm text-red-500 mt-1"&gt;(Declaration of Independence)&lt;/p&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div id="dropTarget" class="bg-gray-100 border-4 border-dashed border-gray-400 p-8 rounded-lg w-full md:w-1/2 h-32 flex items-center justify-center text-gray-500"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;p id="dropText"&gt;Drop Your Idea Card Here to Save It&lt;/p&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/section&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;section&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;h2 class="text-2xl font-bold text-gray-800 mb-6 border-t-4 border-red-200 pt-4"&gt;Activity 2: Find the Freedoms!&lt;/h2&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div class="mb-8 p-4 bg-gray-50 rounded-lg"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;h3 class="text-xl font-semibold text-gray-700 mb-4"&gt;Part 1: Circle the Freedoms&lt;/h3&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;p class="text-gray-600 mb-6"&gt;Circle the **three pictures** that show one of "My Freedoms" (Life, Liberty, or Happiness).&lt;/p&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div id="freedomOptions" class="grid grid-cols-2 lg:grid-cols-4 gap-4"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="freedom-option bg-white p-4 rounded-lg shadow-md text-center" data-correct="true"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;span class="text-5xl" role="img" aria-label="Happy Face"&gt;😄&lt;/span&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;p class="text-sm text-gray-500 mt-2"&gt;A happy feeling&lt;/p&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="freedom-option bg-white p-4 rounded-lg shadow-md text-center" data-correct="false"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;span class="text-5xl" role="img" aria-label="Chain and Lock"&gt;🔒🔗&lt;/span&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;p class="text-sm text-gray-500 mt-2"&gt;Locked up&lt;/p&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="freedom-option bg-white p-4 rounded-lg shadow-md text-center" data-correct="true"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;span class="text-5xl" role="img" aria-label="Child playing with toys"&gt;🧸⚽&lt;/span&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;p class="text-sm text-gray-500 mt-2"&gt;The right to play&lt;/p&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="freedom-option bg-white p-4 rounded-lg shadow-md text-center" data-correct="true"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;span class="text-5xl" role="img" aria-label="Child running outside"&gt;🏃‍♀️🌳&lt;/span&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;p class="text-sm text-gray-500 mt-2"&gt;The right to move&lt;/p&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/section&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;section&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;h2 class="text-2xl font-bold text-gray-800 mb-6 border-t-4 border-red-200 pt-4"&gt;Activity 3: Match the Three Freedoms!&lt;/h2&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;p class="text-gray-600 mb-6"&gt;Drag the **Freedom Card** to the picture and word that shows what it means.&lt;/p&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div id="dragRights" class="flex flex-wrap justify-around bg-red-50 p-4 rounded-lg shadow-inner mb-8 space-x-2 space-y-2"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div id="drag-live" class="drag-item bg-red-600 p-3 rounded-lg text-center shadow-md cursor-grab text-white" draggable="true" data-right="live"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;p class="font-bold text-lg"&gt;The Right to LIVE&lt;/p&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div id="drag-free" class="drag-item bg-blue-600 p-3 rounded-lg text-center shadow-md cursor-grab text-white" draggable="true" data-right="free"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;p class="font-bold text-lg"&gt;The Right to be FREE&lt;/p&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div id="drag-happy" class="drag-item bg-yellow-600 p-3 rounded-lg text-center shadow-md cursor-grab text-white" draggable="true" data-right="happy"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;p class="font-bold text-lg"&gt;The Right to be HAPPY&lt;/p&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div id="dropDefinitions" class="grid grid-cols-1 md:grid-cols-3 gap-6"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div class="drop-target p-4 border-4 border-dashed border-yellow-400 rounded-xl text-center flex flex-col items-center justify-center" data-accept="happy"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;span class="text-yellow-600 text-5xl mb-2" role="img" aria-label="Star"&gt;⭐&lt;/span&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;p class="font-semibold text-gray-700"&gt;The right to set goals and chase your dreams.&lt;/p&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div class="drop-target p-4 border-4 border-dashed border-red-400 rounded-xl text-center flex flex-col items-center justify-center" data-accept="live"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;span class="text-red-600 text-5xl mb-2" role="img" aria-label="Heart"&gt;❤️&lt;/span&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;p class="font-semibold text-gray-700"&gt;The right to be safe, healthy, and protected.&lt;/p&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div class="drop-target p-4 border-4 border-dashed border-blue-400 rounded-xl text-center flex flex-col items-center justify-center" data-accept="free"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;span class="text-blue-600 text-5xl mb-2" role="img" aria-label="Running Person"&gt;🏃&lt;/span&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;p class="font-semibold text-gray-700"&gt;The power to make your own choices and move.&lt;/p&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div id="dragDropFeedback" class="text-center mt-6 text-xl font-bold text-gray-500"&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/section&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;section class="mt-8"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;h2 class="text-2xl font-bold text-gray-800 mb-6 border-t-4 border-red-200 pt-4"&gt;Activity 4: Draw Your Freedom!&lt;/h2&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div class="p-4 bg-gray-50 rounded-lg"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;p class="text-gray-600 mb-4"&gt;Use the drawing pad below to draw a picture of you using your favorite freedom!&lt;/p&gt;</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">                </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div class="flex items-center space-x-4 mb-4"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;label for="penColor" class="text-gray-700 font-medium"&gt;Pen Color:&lt;/label&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;input type="color" id="penColor" value="#000000" class="w-10 h-10 rounded-full border-2 border-gray-300"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;button id="clearButton" class="px-4 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-red-600 transition duration-200"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>Clear Drawing</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">                </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;canvas id="drawingCanvas" class="border-2 border-gray-300 rounded-lg bg-white"&gt;&lt;/canvas&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;label for="freedomLabel" class="block text-gray-700 font-medium mt-4 mb-2"&gt;My favorite freedom is:&lt;/label&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;input type="text" id="freedomLabel" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500" placeholder="Example: to play outside with my friends!"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/section&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/main&gt;</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">    </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div id="feedbackBox" class="feedback"&gt;&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// --- Functional Script ---</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const card = document.getElementById('ideaCard');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const dropTarget = document.getElementById('dropTarget');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const dropText = document.getElementById('dropText');</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>card.addEventListener('dragstart', (e) =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>e.dataTransfer.setData('text/plain', e.target.dataset.concept);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>e.target.classList.add('opacity-50');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>});</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>card.addEventListener('dragend', (e) =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>e.target.classList.remove('opacity-50');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>});</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>dropTarget.addEventListener('dragover', (e) =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>e.preventDefault();<span class="Apple-converted-space"> </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>dropTarget.classList.add('bg-gray-200', 'border-red-500');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>});</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>dropTarget.addEventListener('dragleave', () =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>dropTarget.classList.remove('bg-gray-200', 'border-red-500');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>});</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>dropTarget.addEventListener('drop', (e) =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>e.preventDefault();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>dropTarget.classList.remove('bg-gray-200', 'border-red-500');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const data = e.dataTransfer.getData('text/plain');</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (data === 'Natural Rights') {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>card.style.display = 'none';<span class="Apple-converted-space"> </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>dropTarget.classList.add('bg-green-100', 'border-green-500');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>dropText.innerHTML = `&lt;span class="text-green-700 font-bold"&gt;CARD SAVED!&lt;/span&gt; &lt;br&gt; ${data} - Ready for Day 5!`;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>showFeedback('Card Saved!', 'bg-green-500');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>} else {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>showFeedback('Wrong card! Try again.', 'bg-red-500');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>});</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const freedomOptions = document.querySelectorAll('.freedom-option');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const totalCorrectA2 = 3;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>freedomOptions.forEach(option =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>option.addEventListener('click', () =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const isSelected = option.classList.contains('selected');</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if (!isSelected) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>option.classList.add('selected');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>} else {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>option.classList.remove('selected');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>checkCompletionA2();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>});</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>});</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function checkCompletionA2() {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let correctSelections = 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let incorrectSelections = 0;</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>freedomOptions.forEach(option =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if (option.classList.contains('selected')) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>if (option.dataset.correct === 'true') {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>correctSelections++;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>} else {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>incorrectSelections++;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>});</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (correctSelections === totalCorrectA2 &amp;&amp; incorrectSelections === 0) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>showFeedback('Activity 2 Complete!', 'bg-blue-500');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}<span class="Apple-converted-space"> </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const dragItems = document.querySelectorAll('.drag-item');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const dropTargets = document.querySelectorAll('.drop-target');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>let correctDrops = 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const totalDrops = 3;</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>dragItems.forEach(item =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>item.addEventListener('dragstart', (e) =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>e.dataTransfer.setData('text/plain', e.target.dataset.right);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>e.target.classList.add('dragging');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>});</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>item.addEventListener('dragend', (e) =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>e.target.classList.remove('dragging');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>});</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>});</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>dropTargets.forEach(target =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>target.addEventListener('dragover', (e) =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>e.preventDefault();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>target.classList.add('drag-over');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>});</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>target.addEventListener('dragleave', () =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>target.classList.remove('drag-over');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>});</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>target.addEventListener('drop', (e) =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>e.preventDefault();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>target.classList.remove('drag-over');</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">                </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const draggedRight = e.dataTransfer.getData('text/plain');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const acceptedRight = target.dataset.accept;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const droppedElement = document.querySelector('[data-right="' + draggedRight + '"]');</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if (draggedRight === acceptedRight &amp;&amp; !target.classList.contains('dropped')) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>target.classList.add('dropped');</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">                    </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>droppedElement.classList.remove('bg-red-600', 'bg-blue-600', 'bg-yellow-600');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>droppedElement.classList.add('bg-green-500', 'shadow-none', 'p-2');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>droppedElement.style.margin = '4px auto';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>droppedElement.style.cursor = 'default';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>droppedElement.draggable = false;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>target.innerHTML = '';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>target.appendChild(droppedElement);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>correctDrops++;</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">                    </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>showFeedback('Correct Match!', 'bg-green-500');</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">                    </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>if (correctDrops === totalDrops) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                         </span>document.getElementById('dragDropFeedback').textContent = "All Three Freedoms Matched! Great work on Day 1!";</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                         </span>document.getElementById('dragDropFeedback').classList.add('text-blue-600');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>} else if (draggedRight !== acceptedRight) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>showFeedback('Wrong Match! Try again.', 'bg-red-500');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>});</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>});</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const canvas = document.getElementById('drawingCanvas');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const ctx = canvas.getContext('2d');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const clearButton = document.getElementById('clearButton');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const penColorInput = document.getElementById('penColor');</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>let isDrawing = false;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>let lastX = 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>let lastY = 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>let currentColor = penColorInput.value;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function resizeCanvas() {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>canvas.width = canvas.clientWidth;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>canvas.height = canvas.clientHeight;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>ctx.fillStyle = '#ffffff';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>ctx.fillRect(0, 0, canvas.width, canvas.height);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>window.addEventListener('resize', resizeCanvas);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>window.addEventListener('load', resizeCanvas);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>ctx.lineWidth = 5;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>ctx.lineJoin = 'round';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>ctx.lineCap = 'round';</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>penColorInput.addEventListener('input', (e) =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>currentColor = e.target.value;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>});</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>clearButton.addEventListener('click', () =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>ctx.fillRect(0, 0, canvas.width, canvas.height);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>showFeedback('Canvas Cleared!', 'bg-gray-500');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>});</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function getPos(e) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const rect = canvas.getBoundingClientRect();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let clientX, clientY;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (e.touches &amp;&amp; e.touches.length &gt; 0) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>clientX = e.touches[0].clientX;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>clientY = e.touches[0].clientY;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>} else {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>clientX = e.clientX;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>clientY = e.clientY;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>return {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>x: clientX - rect.left,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>y: clientY - rect.top</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>};</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function draw(e) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (!isDrawing) return;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>e.preventDefault();<span class="Apple-converted-space"> </span></span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const pos = getPos(e);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>ctx.beginPath();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>ctx.strokeStyle = currentColor;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>ctx.moveTo(lastX, lastY);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>ctx.lineTo(pos.x, pos.y);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>ctx.stroke();</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>[lastX, lastY] = [pos.x, pos.y];</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function startDrawing(e) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>isDrawing = true;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>[lastX, lastY] = [getPos(e).x, getPos(e).y];</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function stopDrawing() {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>isDrawing = false;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>canvas.addEventListener('mousedown', startDrawing);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>canvas.addEventListener('mousemove', draw);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>canvas.addEventListener('mouseup', stopDrawing);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>canvas.addEventListener('mouseout', stopDrawing);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>canvas.addEventListener('touchstart', startDrawing);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>canvas.addEventListener('touchmove', draw);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>canvas.addEventListener('touchend', stopDrawing);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>canvas.addEventListener('touchcancel', stopDrawing);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const feedbackBox = document.getElementById('feedbackBox');</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function showFeedback(message, bgColor) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>feedbackBox.textContent = message;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>feedbackBox.className = `feedback ${bgColor} text-white`;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>feedbackBox.style.display = 'block';</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>setTimeout(() =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>feedbackBox.style.display = 'none';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}, 1500);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/script&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/body&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/html&gt;</span></p>
+<body class="p-4 md:p-8">
+
+    <header class="text-center mb-8">
+        <h1 class="text-4xl font-bold text-red-600 mb-2">Day 1: My Freedoms (Natural Rights)</h1>
+        <p class="text-xl text-gray-700">The "Go-Free" Paper: The Declaration of Independence</p>
+    </header>
+
+    <main class="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-2xl">
+
+        <section class="mb-8 border-b-4 border-red-200 pb-4">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Reading: The Declaration and My Freedoms</h2>
+            <div class="space-y-4 text-lg text-gray-700 leading-relaxed">
+                <p>Long ago, we wrote a special paper called the **Declaration of Independence**. This paper was important because it said we wanted to be **free** from a big King's rules. This paper is the "Go-Free" Paper!</p>
+                <p class="p-3 bg-red-50 rounded-lg border-l-4 border-red-500 font-semibold">
+                    The paper says that every person is born with special gifts. These are gifts from nature, not from a government. We call these gifts **My Freedoms** (or Natural Rights).
+                </p>
+                <p>
+                    What are **My Freedoms**? They are the right to **Live**, the right to be **Free**, and the right to feel **Happy**. No boss can take these basic freedoms away!
+                </p>
+            </div>
+        </section>
+
+        <section class="mb-10">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Activity 1: Save the Idea Card</h2>
+            <p class="text-gray-600 mb-4">Drag the **Red Idea Card** into the collection box. You will need this card on Day 5!</p>
+
+            <div class="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
+                <div id="ideaCard" class="concept-card bg-red-100 p-4 rounded-lg text-center shadow-lg w-full md:w-1/3" draggable="true" data-concept="Natural Rights">
+                    <p class="text-4xl font-extrabold text-red-600">My Freedoms</p>
+                    <p class="text-sm text-red-500 mt-1">(Declaration of Independence)</p>
+                </div>
+                <div id="dropTarget" class="bg-gray-100 border-4 border-dashed border-gray-400 p-8 rounded-lg w-full md:w-1/2 h-32 flex items-center justify-center text-gray-500">
+                    <p id="dropText">Drop Your Idea Card Here to Save It</p>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 border-t-4 border-red-200 pt-4">Activity 2: Find the Freedoms!</h2>
+            <div class="mb-8 p-4 bg-gray-50 rounded-lg">
+                <h3 class="text-xl font-semibold text-gray-700 mb-4">Part 1: Circle the Freedoms</h3>
+                <p class="text-gray-600 mb-6">Circle the **three pictures** that show one of "My Freedoms" (Life, Liberty, or Happiness).</p>
+
+                <div id="freedomOptions" class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="freedom-option bg-white p-4 rounded-lg shadow-md text-center" data-correct="true">
+                        <span class="text-5xl" role="img" aria-label="Happy Face">😄</span>
+                        <p class="text-sm text-gray-500 mt-2">A happy feeling</p>
+                    </div>
+                    <div class="freedom-option bg-white p-4 rounded-lg shadow-md text-center" data-correct="false">
+                        <span class="text-5xl" role="img" aria-label="Chain and Lock">🔒🔗</span>
+                        <p class="text-sm text-gray-500 mt-2">Locked up</p>
+                    </div>
+                    <div class="freedom-option bg-white p-4 rounded-lg shadow-md text-center" data-correct="true">
+                        <span class="text-5xl" role="img" aria-label="Child playing with toys">🧸⚽</span>
+                        <p class="text-sm text-gray-500 mt-2">The right to play</p>
+                    </div>
+                    <div class="freedom-option bg-white p-4 rounded-lg shadow-md text-center" data-correct="true">
+                        <span class="text-5xl" role="img" aria-label="Child running outside">🏃‍♀️🌳</span>
+                        <p class="text-sm text-gray-500 mt-2">The right to move</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 border-t-4 border-red-200 pt-4">Activity 3: Match the Three Freedoms!</h2>
+            <p class="text-gray-600 mb-6">Drag the **Freedom Card** to the picture and word that shows what it means.</p>
+
+            <div id="dragRights" class="flex flex-wrap justify-around bg-red-50 p-4 rounded-lg shadow-inner mb-8 space-x-2 space-y-2">
+                <div id="drag-live" class="drag-item bg-red-600 p-3 rounded-lg text-center shadow-md cursor-grab text-white" draggable="true" data-right="live">
+                    <p class="font-bold text-lg">The Right to LIVE</p>
+                </div>
+                <div id="drag-free" class="drag-item bg-blue-600 p-3 rounded-lg text-center shadow-md cursor-grab text-white" draggable="true" data-right="free">
+                    <p class="font-bold text-lg">The Right to be FREE</p>
+                </div>
+                <div id="drag-happy" class="drag-item bg-yellow-600 p-3 rounded-lg text-center shadow-md cursor-grab text-white" draggable="true" data-right="happy">
+                    <p class="font-bold text-lg">The Right to be HAPPY</p>
+                </div>
+            </div>
+
+            <div id="dropDefinitions" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="drop-target p-4 border-4 border-dashed border-yellow-400 rounded-xl text-center flex flex-col items-center justify-center" data-accept="happy">
+                    <span class="text-yellow-600 text-5xl mb-2" role="img" aria-label="Star">⭐</span>
+                    <p class="font-semibold text-gray-700">The right to set goals and chase your dreams.</p>
+                </div>
+                <div class="drop-target p-4 border-4 border-dashed border-red-400 rounded-xl text-center flex flex-col items-center justify-center" data-accept="live">
+                    <span class="text-red-600 text-5xl mb-2" role="img" aria-label="Heart">❤️</span>
+                    <p class="font-semibold text-gray-700">The right to be safe, healthy, and protected.</p>
+                </div>
+                <div class="drop-target p-4 border-4 border-dashed border-blue-400 rounded-xl text-center flex flex-col items-center justify-center" data-accept="free">
+                    <span class="text-blue-600 text-5xl mb-2" role="img" aria-label="Running Person">🏃</span>
+                    <p class="font-semibold text-gray-700">The power to make your own choices and move.</p>
+                </div>
+            </div>
+            <div id="dragDropFeedback" class="text-center mt-6 text-xl font-bold text-gray-500"></div>
+        </section>
+
+        <section class="mt-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 border-t-4 border-red-200 pt-4">Activity 4: Draw Your Freedom!</h2>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="text-gray-600 mb-4">Use the drawing pad below to draw a picture of you using your favorite freedom!</p>
+                
+                <div class="flex items-center space-x-4 mb-4">
+                    <label for="penColor" class="text-gray-700 font-medium">Pen Color:</label>
+                    <input type="color" id="penColor" value="#000000" class="w-10 h-10 rounded-full border-2 border-gray-300">
+                    <button id="clearButton" class="px-4 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-red-600 transition duration-200">
+                        Clear Drawing
+                    </button>
+                </div>
+                
+                <canvas id="drawingCanvas" class="border-2 border-gray-300 rounded-lg bg-white"></canvas>
+
+                <label for="freedomLabel" class="block text-gray-700 font-medium mt-4 mb-2">My favorite freedom is:</label>
+                <input type="text" id="freedomLabel" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500" placeholder="Example: to play outside with my friends!">
+            </div>
+        </section>
+
+    </main>
+    
+    <div id="feedbackBox" class="feedback"></div>
+
+    <script>
+        // --- Functional Script ---
+
+        const card = document.getElementById('ideaCard');
+        const dropTarget = document.getElementById('dropTarget');
+        const dropText = document.getElementById('dropText');
+        
+        card.addEventListener('dragstart', (e) => {
+            e.dataTransfer.setData('text/plain', e.target.dataset.concept);
+            e.target.classList.add('opacity-50');
+        });
+
+        card.addEventListener('dragend', (e) => {
+            e.target.classList.remove('opacity-50');
+        });
+
+        dropTarget.addEventListener('dragover', (e) => {
+            e.preventDefault(); 
+            dropTarget.classList.add('bg-gray-200', 'border-red-500');
+        });
+
+        dropTarget.addEventListener('dragleave', () => {
+            dropTarget.classList.remove('bg-gray-200', 'border-red-500');
+        });
+
+        dropTarget.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropTarget.classList.remove('bg-gray-200', 'border-red-500');
+            const data = e.dataTransfer.getData('text/plain');
+            
+            if (data === 'Natural Rights') {
+                card.style.display = 'none'; 
+                dropTarget.classList.add('bg-green-100', 'border-green-500');
+                dropText.innerHTML = `<span class="text-green-700 font-bold">CARD SAVED!</span> <br> ${data} - Ready for Day 5!`;
+                showFeedback('Card Saved!', 'bg-green-500');
+            } else {
+                showFeedback('Wrong card! Try again.', 'bg-red-500');
+            }
+        });
+
+
+        const freedomOptions = document.querySelectorAll('.freedom-option');
+        const totalCorrectA2 = 3;
+
+        freedomOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                const isSelected = option.classList.contains('selected');
+
+                if (!isSelected) {
+                    option.classList.add('selected');
+                } else {
+                    option.classList.remove('selected');
+                }
+
+                checkCompletionA2();
+            });
+        });
+
+        function checkCompletionA2() {
+            let correctSelections = 0;
+            let incorrectSelections = 0;
+            
+            freedomOptions.forEach(option => {
+                if (option.classList.contains('selected')) {
+                    if (option.dataset.correct === 'true') {
+                        correctSelections++;
+                    } else {
+                        incorrectSelections++;
+                    }
+                }
+            });
+
+            if (correctSelections === totalCorrectA2 && incorrectSelections === 0) {
+                showFeedback('Activity 2 Complete!', 'bg-blue-500');
+            } 
+        }
+
+        const dragItems = document.querySelectorAll('.drag-item');
+        const dropTargets = document.querySelectorAll('.drop-target');
+        let correctDrops = 0;
+        const totalDrops = 3;
+        
+        dragItems.forEach(item => {
+            item.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', e.target.dataset.right);
+                e.target.classList.add('dragging');
+            });
+            item.addEventListener('dragend', (e) => {
+                e.target.classList.remove('dragging');
+            });
+        });
+
+        dropTargets.forEach(target => {
+            target.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                target.classList.add('drag-over');
+            });
+            target.addEventListener('dragleave', () => {
+                target.classList.remove('drag-over');
+            });
+            target.addEventListener('drop', (e) => {
+                e.preventDefault();
+                target.classList.remove('drag-over');
+                
+                const draggedRight = e.dataTransfer.getData('text/plain');
+                const acceptedRight = target.dataset.accept;
+                const droppedElement = document.querySelector('[data-right="' + draggedRight + '"]');
+
+                if (draggedRight === acceptedRight && !target.classList.contains('dropped')) {
+                    target.classList.add('dropped');
+                    
+                    droppedElement.classList.remove('bg-red-600', 'bg-blue-600', 'bg-yellow-600');
+                    droppedElement.classList.add('bg-green-500', 'shadow-none', 'p-2');
+                    droppedElement.style.margin = '4px auto';
+                    droppedElement.style.cursor = 'default';
+                    droppedElement.draggable = false;
+                    target.innerHTML = '';
+                    target.appendChild(droppedElement);
+                    correctDrops++;
+                    
+                    showFeedback('Correct Match!', 'bg-green-500');
+                    
+                    if (correctDrops === totalDrops) {
+                         document.getElementById('dragDropFeedback').textContent = "All Three Freedoms Matched! Great work on Day 1!";
+                         document.getElementById('dragDropFeedback').classList.add('text-blue-600');
+                    }
+
+                } else if (draggedRight !== acceptedRight) {
+                    showFeedback('Wrong Match! Try again.', 'bg-red-500');
+                }
+            });
+        });
+
+        const canvas = document.getElementById('drawingCanvas');
+        const ctx = canvas.getContext('2d');
+        const clearButton = document.getElementById('clearButton');
+        const penColorInput = document.getElementById('penColor');
+        
+        let isDrawing = false;
+        let lastX = 0;
+        let lastY = 0;
+        let currentColor = penColorInput.value;
+
+        function resizeCanvas() {
+            canvas.width = canvas.clientWidth;
+            canvas.height = canvas.clientHeight;
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+        window.addEventListener('resize', resizeCanvas);
+        window.addEventListener('load', resizeCanvas);
+
+        ctx.lineWidth = 5;
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
+        
+        penColorInput.addEventListener('input', (e) => {
+            currentColor = e.target.value;
+        });
+
+        clearButton.addEventListener('click', () => {
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            showFeedback('Canvas Cleared!', 'bg-gray-500');
+        });
+
+        function getPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            let clientX, clientY;
+
+            if (e.touches && e.touches.length > 0) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+
+            return {
+                x: clientX - rect.left,
+                y: clientY - rect.top
+            };
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            e.preventDefault(); 
+
+            const pos = getPos(e);
+
+            ctx.beginPath();
+            ctx.strokeStyle = currentColor;
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
+
+            [lastX, lastY] = [pos.x, pos.y];
+        }
+
+        function startDrawing(e) {
+            isDrawing = true;
+            [lastX, lastY] = [getPos(e).x, getPos(e).y];
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+        }
+
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+
+        canvas.addEventListener('touchstart', startDrawing);
+        canvas.addEventListener('touchmove', draw);
+        canvas.addEventListener('touchend', stopDrawing);
+        canvas.addEventListener('touchcancel', stopDrawing);
+
+
+        const feedbackBox = document.getElementById('feedbackBox');
+
+        function showFeedback(message, bgColor) {
+            feedbackBox.textContent = message;
+            feedbackBox.className = `feedback ${bgColor} text-white`;
+            feedbackBox.style.display = 'block';
+            
+            setTimeout(() => {
+                feedbackBox.style.display = 'none';
+            }, 1500);
+        }
+    </script>
 </body>
 </html>
