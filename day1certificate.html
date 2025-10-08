@@ -85,7 +85,7 @@
             🖨️ Print or Save as PDF
         </button>
         <!-- Link goes back to the worksheet file, currently named index.html in the Canvas -->
-        <a href="index.html" class="ml-4 px-6 py-3 bg-gray-500 text-white font-bold rounded-lg shadow-md hover:bg-gray-600 transition">
+        <a href="index.html" id="goBackButton" class="ml-4 px-6 py-3 bg-gray-500 text-white font-bold rounded-lg shadow-md hover:bg-gray-600 transition">
             Go Back
         </a>
     </div>
@@ -106,8 +106,20 @@
                 // If a name was stored from the worksheet, use it.
                 studentNameElement.textContent = storedName;
             }
-            // If no name is stored, it defaults to 'A Great Student' from the HTML, 
-            // which is much cleaner than using the disallowed window.prompt().
+            // If no name is stored, it defaults to 'A Great Student' from the HTML.
+
+            // 1. Set the completion flag before allowing the user to navigate back
+            const goBackButton = document.getElementById('goBackButton');
+            goBackButton.addEventListener('click', (e) => {
+                // Prevent default navigation
+                e.preventDefault(); 
+                
+                // Set the completion state for index.html to read
+                localStorage.setItem('day1_completed', 'true');
+                
+                // Now navigate back
+                window.location.href = goBackButton.href;
+            });
         };
 
     </script>
