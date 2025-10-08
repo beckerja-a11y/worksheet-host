@@ -1,10 +1,10 @@
-<!-- NOTE: This version replaces the external TTS API call with the browser's built-in Web Speech API to bypass the 403 error. -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Day 1: My Freedoms (Natural Rights)</title>
+    <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
@@ -12,32 +12,52 @@
             font-family: 'Inter', sans-serif;
             background-color: #f0f4f8;
         }
-        .concept-card { cursor: grab; transition: transform 0.2s, box-shadow 0.2s; border: 4px solid #ef4444; }
-        .concept-card:active { cursor: grabbing; box-shadow: 0 10px 20px rgba(239, 68, 68, 0.4); transform: scale(1.05); }
+        /* Styles for Activities 2 & 3 (Old 3 & 4) */
         .freedom-option { transition: all 0.2s; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .freedom-option:hover { transform: scale(1.05); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
         .selected { border: 4px solid #10b981; background-color: #d1fae5; }
+        
+        /* Styles for Activity 3 (Drag and Drop) */
         .drag-item { cursor: grab; transition: opacity 0.2s; min-width: 100px; }
         .drag-item.dragging { opacity: 0.5; }
         .drop-target { background-color: #fefefe; transition: background-color 0.2s, border-color 0.2s; min-height: 180px; }
         .drop-target.drag-over { background-color: #ffe4e6; border-color: #ef4444; }
         .drop-target.dropped { border-color: #10b981 !important; background-color: #d1fae5; }
-        .feedback { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); padding: 20px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); z-index: 1000; }
+        
+        /* General Feedback */
+        .feedback { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); padding: 20px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); z-index: 1000; font-weight: bold; }
+        
+        /* Drawing Canvas */
         #drawingCanvas { width: 100%; height: 250px; }
         
-        /* Custom arrow and spinner animation for TTS */
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(0.9); }
+        /* TTS Button Style */
+        .tts-icon-button {
+            transition: transform 0.1s;
+            flex-shrink: 0;
+            margin-left: 8px;
         }
-        #ttsButton {
-            animation: pulse 1.5s infinite;
+        .tts-icon-button:hover {
+            transform: scale(1.1);
         }
-        #ttsDirection {
-            right: 100%; 
-            margin-right: 2rem; 
-            font-size: 0.8rem;
-            white-space: nowrap;
+
+        /* Activity 1 (New) Click-Match */
+        .match-card {
+            min-height: 100px;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: 2px solid #e5e7eb;
+        }
+        .match-card:hover {
+            border-color: #a5b4fc;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .match-card.selected-match {
+            border-color: #4f46e5;
+            background-color: #eef2ff;
+        }
+
+        #completionButton:disabled {
+            cursor: not-allowed;
         }
     </style>
 </head>
@@ -50,24 +70,14 @@
 
     <main class="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-2xl">
 
+        <!-- Initial Reading Section -->
         <section class="mb-8 border-b-4 border-red-200 pb-4">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-2xl font-bold text-gray-800">Reading: The Declaration and My Freedoms</h2>
-                <div class="flex items-center space-x-2 relative">
-                    <!-- ARROW & Directions -->
-                    <div id="ttsDirection" class="absolute top-1/2 transform -translate-y-1/2 p-2 bg-indigo-500 text-white text-xs font-semibold rounded-lg shadow-lg hidden md:block">
-                        Click to Read Aloud!
-                        <!-- Arrow pointing to the button -->
-                        <svg class="w-4 h-4 absolute top-1/2 -right-3 transform -translate-y-1/2 rotate-90 text-indigo-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 20l10-10L10 0l-10 10z"></path></svg>
-                    </div>
-
-                    <button id="ttsButton" class="p-3 bg-red-600 text-white rounded-full shadow-lg hover:bg-red-700 transition duration-200 flex items-center justify-center disabled:opacity-50" title="Read Text Aloud">
-                         <!-- Speaker Icon (lucide-react volume-2 equivalent) -->
-                         <svg id="speakerIcon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a.5.5 0 01-.176.708l-5.32 3.547a.5.5 0 01-.796-.407V8.5a.5.5 0 01.796-.407l5.32-3.547a.5.5 0 01.708.176v6.86a.5.5 0 01-.176.708zM18 11a7 7 0 00-7-7"></path></svg>
-                         <!-- Loading Spinner -->
-                         <svg id="loadingSpinner" class="w-6 h-6 animate-spin hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" xmlns="http://www.w3.org/2000/svg"><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                    </button>
-                </div>
+                <button onclick="speakElementText('readingText')" class="p-3 bg-red-600 text-white rounded-full shadow-lg hover:bg-red-700 transition duration-200 flex items-center justify-center disabled:opacity-50 tts-icon-button" title="Read All Text Aloud">
+                    <!-- Speaker Icon -->
+                    <svg id="speakerIcon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a.5.5 0 01-.176.708l-5.32 3.547a.5.5 0 01-.796-.407V8.5a.5.5 0 01.796-.407l5.32-3.547a.5.5 0 01.708.176v6.86a.5.5 0 01-.176.708zM18 11a7 7 0 00-7-7"></path></svg>
+                </button>
             </div>
             
             <div id="readingText" class="space-y-4 text-lg text-gray-700 leading-relaxed">
@@ -87,41 +97,62 @@
             </div>
         </section>
 
+        <!-- NEW ACTIVITY 1: MATCH THE WORDS -->
         <section class="mb-10">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">Activity 1: Save the Idea Card</h2>
-            <p class="text-gray-600 mb-4">Drag the **Red Idea Card** into the collection box. You will need this card on Day 5!</p>
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Activity 1: Match the Words</h2>
+            <div class="flex items-center mb-6">
+                <p id="a1-direction" class="text-gray-600">Click one word from the **LEFT** and one word from the **RIGHT** to make a match that shows a Natural Right.</p>
+                <button onclick="speakElementText('a1-direction')" class="tts-icon-button p-2 bg-indigo-100 text-indigo-700 rounded-full hover:bg-indigo-200" title="Read Directions"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9 11H7a1 1 0 010-2h2a1 1 0 010 2zm4.555-1.929a.5.5 0 01.176.708l-5.32 3.547a.5.5 0 01-.796-.407V8.5a.5.5 0 01.796-.407l5.32 3.547a.5.5 0 01.708.176v6.86a.5.5 0 01-.176.708zM18 11a7 7 0 00-7-7"></path></svg></button>
+            </div>
 
-            <div class="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
-                <div id="ideaCard" class="concept-card bg-red-100 p-4 rounded-lg text-center shadow-lg w-full md:w-1/3" draggable="true" data-concept="Natural Rights">
-                    <p class="text-4xl font-extrabold text-red-600">My Freedoms</p>
-                    <p class="text-sm text-red-500 mt-1">(Declaration of Independence)</p>
+            <div id="matchArea" class="grid grid-cols-2 gap-4">
+                <!-- Left Column (Rights) -->
+                <div id="leftColumn" class="space-y-3 p-3 bg-red-100 rounded-lg shadow-inner">
+                    <p class="text-center font-bold text-red-800">Natural Right</p>
+                    <div data-value="Life" class="match-card bg-white p-4 rounded-lg text-center shadow-md">Life</div>
+                    <div data-value="Liberty" class="match-card bg-white p-4 rounded-lg text-center shadow-md">Liberty</div>
+                    <div data-value="Happiness" class="match-card bg-white p-4 rounded-lg text-center shadow-md">Happiness</div>
                 </div>
-                <div id="dropTarget" class="bg-gray-100 border-4 border-dashed border-gray-400 p-8 rounded-lg w-full md:w-1/2 h-32 flex items-center justify-center text-gray-500">
-                    <p id="dropText">Drop Your Idea Card Here to Save It</p>
+
+                <!-- Right Column (Meaning) -->
+                <div id="rightColumn" class="space-y-3 p-3 bg-blue-100 rounded-lg shadow-inner">
+                    <p class="text-center font-bold text-blue-800">Meaning</p>
+                    <div data-value="Safe" class="match-card bg-white p-4 rounded-lg text-center shadow-md">Be safe and protected</div>
+                    <div data-value="Dreams" class="match-card bg-white p-4 rounded-lg text-center shadow-md">Chase your dreams</div>
+                    <div data-value="Choices" class="match-card bg-white p-4 rounded-lg text-center shadow-md">Make your own choices</div>
                 </div>
+            </div>
+            
+            <div class="text-center mt-6">
+                <button id="checkMatchButton" class="bg-indigo-600 text-white px-6 py-3 rounded-lg font-semibold shadow-md hover:bg-indigo-700 transition duration-200 disabled:opacity-50">
+                    Check Match
+                </button>
             </div>
         </section>
 
-        <section>
-            <h2 class="text-2xl font-bold text-gray-800 mb-6 border-t-4 border-red-200 pt-4">Activity 2: Find the Freedoms!</h2>
+        <!-- ACTIVITY 2: FIND THE FREEDOMS (Old Activity 2) -->
+        <section class="mb-10">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4 border-t-4 border-red-200 pt-4">Activity 2: Find the Freedoms!</h2>
             <div class="mb-8 p-4 bg-gray-50 rounded-lg">
-                <h3 class="text-xl font-semibold text-gray-700 mb-4">Part 1: Circle the Freedoms</h3>
-                <p class="text-gray-600 mb-6">Circle the **three pictures** that show one of "My Freedoms" (Life, Liberty, or Happiness).</p>
+                <div class="flex items-center mb-6">
+                    <p id="a2-direction" class="text-gray-600">Circle the **three pictures** that show one of "My Freedoms" (Life, Liberty, or Happiness).</p>
+                    <button onclick="speakElementText('a2-direction')" class="tts-icon-button p-2 bg-indigo-100 text-indigo-700 rounded-full hover:bg-indigo-200" title="Read Directions"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9 11H7a1 1 0 010-2h2a1 1 0 010 2zm4.555-1.929a.5.5 0 01.176.708l-5.32 3.547a.5.5 0 01-.796-.407V8.5a.5.5 0 01.796-.407l5.32 3.547a.5.5 0 01.708.176v6.86a.5.5 0 01-.176.708zM18 11a7 7 0 00-7-7"></path></svg></button>
+                </div>
 
                 <div id="freedomOptions" class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div class="freedom-option bg-white p-4 rounded-lg shadow-md text-center" data-correct="true">
+                    <div id="a2-opt1" class="freedom-option bg-white p-4 rounded-lg shadow-md text-center" data-correct="true">
                         <span class="text-5xl" role="img" aria-label="Happy Face">😄</span>
                         <p class="text-sm text-gray-500 mt-2">A happy feeling</p>
                     </div>
-                    <div class="freedom-option bg-white p-4 rounded-lg shadow-md text-center" data-correct="false">
+                    <div id="a2-opt2" class="freedom-option bg-white p-4 rounded-lg shadow-md text-center" data-correct="false">
                         <span class="text-5xl" role="img" aria-label="Chain and Lock">🔒🔗</span>
                         <p class="text-sm text-gray-500 mt-2">Locked up</p>
                     </div>
-                    <div class="freedom-option bg-white p-4 rounded-lg shadow-md text-center" data-correct="true">
+                    <div id="a2-opt3" class="freedom-option bg-white p-4 rounded-lg shadow-md text-center" data-correct="true">
                         <span class="text-5xl" role="img" aria-label="Child playing with toys">🧸⚽</span>
                         <p class="text-sm text-gray-500 mt-2">The right to play</p>
                     </div>
-                    <div class="freedom-option bg-white p-4 rounded-lg shadow-md text-center" data-correct="true">
+                    <div id="a2-opt4" class="freedom-option bg-white p-4 rounded-lg shadow-md text-center" data-correct="true">
                         <span class="text-5xl" role="img" aria-label="Child running outside">🏃‍♀️🌳</span>
                         <p class="text-sm text-gray-500 mt-2">The right to move</p>
                     </div>
@@ -129,9 +160,13 @@
             </div>
         </section>
 
-        <section>
-            <h2 class="text-2xl font-bold text-gray-800 mb-6 border-t-4 border-red-200 pt-4">Activity 3: Match the Three Freedoms!</h2>
-            <p class="text-gray-600 mb-6">Drag the **Freedom Card** to the picture and word that shows what it means.</p>
+        <!-- ACTIVITY 3: MATCH THE THREE FREEDOMS (Old Activity 3 - Drag/Drop) -->
+        <section class="mb-10">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4 border-t-4 border-red-200 pt-4">Activity 3: Match the Three Freedoms!</h2>
+            <div class="flex items-center mb-6">
+                <p id="a3-direction" class="text-gray-600">Drag the **Freedom Card** to the picture and word that shows what it means.</p>
+                <button onclick="speakElementText('a3-direction')" class="tts-icon-button p-2 bg-indigo-100 text-indigo-700 rounded-full hover:bg-indigo-200" title="Read Directions"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9 11H7a1 1 0 010-2h2a1 1 0 010 2zm4.555-1.929a.5.5 0 01.176.708l-5.32 3.547a.5.5 0 01-.796-.407V8.5a.5.5 0 01.796-.407l5.32 3.547a.5.5 0 01.708.176v6.86a.5.5 0 01-.176.708zM18 11a7 7 0 00-7-7"></path></svg></button>
+            </div>
 
             <div id="dragRights" class="flex flex-wrap justify-around bg-red-50 p-4 rounded-lg shadow-inner mb-8 space-x-2 space-y-2">
                 <div id="drag-live" class="drag-item bg-red-600 p-3 rounded-lg text-center shadow-md cursor-grab text-white" draggable="true" data-right="live">
@@ -146,26 +181,64 @@
             </div>
 
             <div id="dropDefinitions" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="drop-target p-4 border-4 border-dashed border-yellow-400 rounded-xl text-center flex flex-col items-center justify-center" data-accept="happy">
+                <div id="a3-drop1" class="drop-target p-4 border-4 border-dashed border-yellow-400 rounded-xl text-center flex flex-col items-center justify-center" data-accept="happy">
                     <span class="text-yellow-600 text-5xl mb-2" role="img" aria-label="Star">⭐</span>
-                    <p class="font-semibold text-gray-700">The right to set goals and chase your dreams.</p>
+                    <p id="a3-desc1" class="font-semibold text-gray-700">The right to set goals and chase your dreams.</p>
                 </div>
-                <div class="drop-target p-4 border-4 border-dashed border-red-400 rounded-xl text-center flex flex-col items-center justify-center" data-accept="live">
+                <div id="a3-drop2" class="drop-target p-4 border-4 border-dashed border-red-400 rounded-xl text-center flex flex-col items-center justify-center" data-accept="live">
                     <span class="text-red-600 text-5xl mb-2" role="img" aria-label="Heart">❤️</span>
-                    <p class="font-semibold text-gray-700">The right to be safe, healthy, and protected.</p>
+                    <p id="a3-desc2" class="font-semibold text-gray-700">The right to be safe, healthy, and protected.</p>
                 </div>
-                <div class="drop-target p-4 border-4 border-dashed border-blue-400 rounded-xl text-center flex flex-col items-center justify-center" data-accept="free">
+                <div id="a3-drop3" class="drop-target p-4 border-4 border-dashed border-blue-400 rounded-xl text-center flex flex-col items-center justify-center" data-accept="free">
                     <span class="text-blue-600 text-5xl mb-2" role="img" aria-label="Running Person">🏃</span>
-                    <p class="font-semibold text-gray-700">The power to make your own choices and move.</p>
+                    <p id="a3-desc3" class="font-semibold text-gray-700">The power to make your own choices and move.</p>
                 </div>
             </div>
             <div id="dragDropFeedback" class="text-center mt-6 text-xl font-bold text-gray-500"></div>
         </section>
 
-        <section class="mt-8">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6 border-t-4 border-red-200 pt-4">Activity 4: Draw Your Freedom!</h2>
+        <!-- NEW ACTIVITY 4: WATCH THE VIDEO -->
+        <section class="mt-8 mb-10">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 border-t-4 border-red-200 pt-4">Activity 4: Watch the Video</h2>
             <div class="p-4 bg-gray-50 rounded-lg">
-                <p class="text-gray-600 mb-4">Use the drawing pad below to draw a picture of you using your favorite freedom!</p>
+                <div class="flex items-center mb-4">
+                    <p id="a4-direction" class="text-gray-600">Watch this short video about the Declaration of Independence and then answer the question below.</p>
+                    <button onclick="speakElementText('a4-direction')" class="tts-icon-button p-2 bg-indigo-100 text-indigo-700 rounded-full hover:bg-indigo-200" title="Read Directions"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9 11H7a1 1 0 010-2h2a1 1 0 010 2zm4.555-1.929a.5.5 0 01.176.708l-5.32 3.547a.5.5 0 01-.796-.407V8.5a.5.5 0 01.796-.407l5.32 3.547a.5.5 0 01.708.176v6.86a.5.5 0 01-.176.708zM18 11a7 7 0 00-7-7"></path></svg></button>
+                </div>
+                
+                <!-- YouTube Embed -->
+                <div class="relative overflow-hidden w-full" style="padding-top: 56.25%;">
+                    <iframe 
+                        class="absolute top-0 left-0 w-full h-full rounded-lg shadow-xl"
+                        src="https://www.youtube.com/embed/uihNc_tdGbk?si=FiPIig9Hn_Alurcn" 
+                        title="YouTube video player" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                        referrerpolicy="strict-origin-when-cross-origin" 
+                        allowfullscreen>
+                    </iframe>
+                </div>
+
+                <!-- Video Question -->
+                <div class="mt-6">
+                    <div class="flex items-center mb-3">
+                        <p id="a4-question" class="text-gray-700 font-medium">After watching, what is **one** of the most important ideas in the Declaration?</p>
+                        <button onclick="speakElementText('a4-question')" class="tts-icon-button p-2 bg-indigo-100 text-indigo-700 rounded-full hover:bg-indigo-200" title="Read Question"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9 11H7a1 1 0 010-2h2a1 1 0 010 2zm4.555-1.929a.5.5 0 01.176.708l-5.32 3.547a.5.5 0 01-.796-.407V8.5a.5.5 0 01.796-.407l5.32 3.547a.5.5 0 01.708.176v6.86a.5.5 0 01-.176.708zM18 11a7 7 0 00-7-7"></path></svg></button>
+                    </div>
+                    
+                    <input type="text" id="videoAnswer" oninput="checkCompletionA4()" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500" placeholder="Type your answer here (1-2 sentences)">
+                </div>
+            </div>
+        </section>
+
+        <!-- ACTIVITY 5: DRAW YOUR FREEDOM (Old Activity 4) -->
+        <section class="mt-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 border-t-4 border-red-200 pt-4">Activity 5: Draw Your Freedom!</h2>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <div class="flex items-center mb-4">
+                    <p id="a5-direction" class="text-gray-600">Use the drawing pad below to draw a picture of you using your favorite freedom!</p>
+                    <button onclick="speakElementText('a5-direction')" class="tts-icon-button p-2 bg-indigo-100 text-indigo-700 rounded-full hover:bg-indigo-200" title="Read Directions"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9 11H7a1 1 0 010-2h2a1 1 0 010 2zm4.555-1.929a.5.5 0 01.176.708l-5.32 3.547a.5.5 0 01-.796-.407V8.5a.5.5 0 01.796-.407l5.32 3.547a.5.5 0 01.708.176v6.86a.5.5 0 01-.176.708zM18 11a7 7 0 00-7-7"></path></svg></button>
+                </div>
                 
                 <div class="flex items-center space-x-4 mb-4">
                     <label for="penColor" class="text-gray-700 font-medium">Pen Color:</label>
@@ -177,9 +250,25 @@
                 
                 <canvas id="drawingCanvas" class="border-2 border-gray-300 rounded-lg bg-white"></canvas>
 
-                <label for="freedomLabel" class="block text-gray-700 font-medium mt-4 mb-2">My favorite freedom is:</label>
-                <input type="text" id="freedomLabel" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500" placeholder="Example: to play outside with my friends!">
+                <div class="mt-4">
+                    <div class="flex items-center mb-2">
+                        <label for="freedomLabel" class="block text-gray-700 font-medium">My favorite freedom is:</label>
+                        <button onclick="speakElementText('freedomLabel')" class="tts-icon-button p-2 bg-indigo-100 text-indigo-700 rounded-full hover:bg-indigo-200" title="Read Question"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9 11H7a1 1 0 010-2h2a1 1 0 010 2zm4.555-1.929a.5.5 0 01.176.708l-5.32 3.547a.5.5 0 01-.796-.407V8.5a.5.5 0 01.796-.407l5.32 3.547a.5.5 0 01.708.176v6.86a.5.5 0 01-.176.708zM18 11a7 7 0 00-7-7"></path></svg></button>
+                    </div>
+                    <input type="text" id="freedomLabel" oninput="checkCompletionA5()" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500" placeholder="Example: to play outside with my friends!">
+                </div>
             </div>
+        </section>
+
+        <!-- SUBMISSION SECTION -->
+        <section class="mt-12 text-center border-t-4 border-green-300 pt-8">
+            <p id="submissionText" class="text-xl font-semibold text-gray-700 mb-4">
+                Finish all 5 activities to get your Certificate of Completion!
+            </p>
+            <a href="#certificate" onclick="handleSubmit(event)" id="completionButton" class="inline-block px-10 py-4 bg-green-500 text-white font-extrabold text-xl rounded-xl shadow-lg transition duration-300 hover:bg-green-600 transform hover:scale-105 disabled:bg-gray-400 disabled:shadow-none" disabled>
+                Get My Certificate!
+            </a>
+            <div id="completionStatus" class="mt-3 text-red-500 font-medium">You must complete all activities.</div>
         </section>
 
     </main>
@@ -187,59 +276,132 @@
     <div id="feedbackBox" class="feedback"></div>
 
     <script>
-        // --- Activity Script ---
+        // --- Completion Tracking ---
+        let completion = {
+            a1: false, // Match the Words (New)
+            a2: false, // Find the Freedoms (Circle)
+            a3: false, // Match the Three Freedoms (Drag/Drop)
+            a4: false, // Watch the Video (Answer)
+            a5: false  // Draw Your Freedom (Draw & Label)
+        };
+        const totalCorrectA2 = 3; // For Activity 2
+        let correctDropsA3 = 0; // For Activity 3
+        const totalDropsA3 = 3;
 
-        const card = document.getElementById('ideaCard');
-        const dropTarget = document.getElementById('dropTarget');
-        const dropText = document.getElementById('dropText');
-        
-        card.addEventListener('dragstart', (e) => {
-            e.dataTransfer.setData('text/plain', e.target.dataset.concept);
-            e.target.classList.add('opacity-50');
-        });
+        // --- Global Check Function ---
+        function checkOverallCompletion() {
+            const allComplete = Object.values(completion).every(status => status);
+            const completionButton = document.getElementById('completionButton');
+            const statusDiv = document.getElementById('completionStatus');
+            const submissionText = document.getElementById('submissionText');
 
-        card.addEventListener('dragend', (e) => {
-            e.target.classList.remove('opacity-50');
-        });
-
-        dropTarget.addEventListener('dragover', (e) => {
-            e.preventDefault(); 
-            dropTarget.classList.add('bg-gray-200', 'border-red-500');
-        });
-
-        dropTarget.addEventListener('dragleave', () => {
-            dropTarget.classList.remove('bg-gray-200', 'border-red-500');
-        });
-
-        dropTarget.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropTarget.classList.remove('bg-gray-200', 'border-red-500');
-            const data = e.dataTransfer.getData('text/plain');
-            
-            if (data === 'Natural Rights') {
-                card.style.display = 'none'; 
-                dropTarget.classList.add('bg-green-100', 'border-green-500');
-                dropText.innerHTML = `<span class="text-green-700 font-bold">CARD SAVED!</span> <br> ${data} - Ready for Day 5!`;
-                showFeedback('Card Saved!', 'bg-green-500');
+            if (allComplete) {
+                completionButton.disabled = false;
+                statusDiv.classList.remove('text-red-500');
+                statusDiv.classList.add('text-green-600');
+                statusDiv.textContent = "All 5 activities are DONE! Click below to submit your work!";
+                submissionText.textContent = "Great job finishing Day 1!";
+                showFeedback('All Activities Complete!', 'bg-green-500');
             } else {
-                showFeedback('Wrong card! Try again.', 'bg-red-500');
+                completionButton.disabled = true;
+                statusDiv.classList.remove('text-green-600');
+                statusDiv.classList.add('text-red-500');
+                
+                const done = Object.values(completion).filter(status => status).length;
+                statusDiv.textContent = `You have completed ${done} of 5 activities. Keep going!`;
+            }
+        }
+
+        // --- Submission Handler ---
+        function handleSubmit(event) {
+            event.preventDefault(); // Prevent actual navigation
+            if (Object.values(completion).every(status => status)) {
+                // Since we can't create a second file for a certificate, we simulate the success message.
+                showFeedback('Submission Successful! Screenshot this page and upload it!', 'bg-green-700 p-8 text-2xl');
+                
+                // Optional: Scroll to the bottom to confirm success
+                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+            } else {
+                showFeedback('Not complete! Finish all activities first.', 'bg-red-500');
+            }
+        }
+
+        // --- Activity 1 Logic (Match the Words) ---
+        let selectedLeft = null;
+        let selectedRight = null;
+        const correctPairs = {
+            "Life": "Safe",
+            "Liberty": "Choices",
+            "Happiness": "Dreams"
+        };
+        let matchedPairs = 0;
+
+        document.querySelectorAll('#leftColumn .match-card').forEach(card => {
+            card.addEventListener('click', () => {
+                if (card.classList.contains('matched')) return;
+                
+                if (selectedLeft) selectedLeft.classList.remove('selected-match');
+                selectedLeft = card;
+                selectedLeft.classList.add('selected-match');
+            });
+        });
+
+        document.querySelectorAll('#rightColumn .match-card').forEach(card => {
+            card.addEventListener('click', () => {
+                if (card.classList.contains('matched')) return;
+
+                if (selectedRight) selectedRight.classList.remove('selected-match');
+                selectedRight = card;
+                selectedRight.classList.add('selected-match');
+            });
+        });
+
+        document.getElementById('checkMatchButton').addEventListener('click', () => {
+            if (!selectedLeft || !selectedRight) {
+                showFeedback('Select one from the left and one from the right!', 'bg-orange-500');
+                return;
+            }
+
+            const leftVal = selectedLeft.dataset.value;
+            const rightVal = selectedRight.dataset.value;
+
+            if (correctPairs[leftVal] === rightVal) {
+                matchedPairs++;
+                
+                selectedLeft.classList.remove('selected-match');
+                selectedRight.classList.remove('selected-match');
+
+                selectedLeft.classList.add('bg-green-200', 'matched', 'cursor-default');
+                selectedRight.classList.add('bg-green-200', 'matched', 'cursor-default');
+                selectedLeft.style.border = '2px solid #10b981';
+                selectedRight.style.border = '2px solid #10b981';
+
+                selectedLeft = null;
+                selectedRight = null;
+
+                showFeedback('Match Found!', 'bg-green-500');
+
+                if (matchedPairs === 3) {
+                    completion.a1 = true;
+                    showFeedback('Activity 1 Complete!', 'bg-blue-500');
+                    checkOverallCompletion();
+                }
+            } else {
+                selectedLeft.classList.remove('selected-match');
+                selectedRight.classList.remove('selected-match');
+                selectedLeft = null;
+                selectedRight = null;
+                showFeedback('Not a match! Try again.', 'bg-red-500');
             }
         });
 
-
-        const freedomOptions = document.querySelectorAll('.freedom-option');
-        const totalCorrectA2 = 3;
+        // --- Activity 2 Logic (Find the Freedoms) ---
+        const freedomOptions = document.querySelectorAll('#freedomOptions .freedom-option');
 
         freedomOptions.forEach(option => {
             option.addEventListener('click', () => {
                 const isSelected = option.classList.contains('selected');
-
-                if (!isSelected) {
-                    option.classList.add('selected');
-                } else {
-                    option.classList.remove('selected');
-                }
-
+                option.classList.toggle('selected', !isSelected);
                 checkCompletionA2();
             });
         });
@@ -259,15 +421,21 @@
             });
 
             if (correctSelections === totalCorrectA2 && incorrectSelections === 0) {
-                showFeedback('Activity 2 Complete!', 'bg-blue-500');
+                if (!completion.a2) {
+                    completion.a2 = true;
+                    showFeedback('Activity 2 Complete!', 'bg-blue-500');
+                    checkOverallCompletion();
+                }
+            } else {
+                completion.a2 = false;
+                checkOverallCompletion();
             } 
         }
 
+        // --- Activity 3 Logic (Match the Three Freedoms - Drag/Drop) ---
         const dragItems = document.querySelectorAll('.drag-item');
         const dropTargets = document.querySelectorAll('.drop-target');
-        let correctDrops = 0;
-        const totalDrops = 3;
-        
+
         dragItems.forEach(item => {
             item.addEventListener('dragstart', (e) => {
                 e.dataTransfer.setData('text/plain', e.target.dataset.right);
@@ -281,7 +449,9 @@
         dropTargets.forEach(target => {
             target.addEventListener('dragover', (e) => {
                 e.preventDefault();
-                target.classList.add('drag-over');
+                if (!target.classList.contains('dropped')) {
+                     target.classList.add('drag-over');
+                }
             });
             target.addEventListener('dragleave', () => {
                 target.classList.remove('drag-over');
@@ -297,28 +467,67 @@
                 if (draggedRight === acceptedRight && !target.classList.contains('dropped')) {
                     target.classList.add('dropped');
                     
-                    droppedElement.classList.remove('bg-red-600', 'bg-blue-600', 'bg-yellow-600');
+                    // Style dropped item
+                    droppedElement.classList.remove('bg-red-600', 'bg-blue-600', 'bg-yellow-600', 'shadow-md');
                     droppedElement.classList.add('bg-green-500', 'shadow-none', 'p-2');
                     droppedElement.style.margin = '4px auto';
                     droppedElement.style.cursor = 'default';
                     droppedElement.draggable = false;
+                    
+                    // Append dropped element
                     target.innerHTML = '';
                     target.appendChild(droppedElement);
-                    correctDrops++;
+                    correctDropsA3++;
                     
                     showFeedback('Correct Match!', 'bg-green-500');
                     
-                    if (correctDrops === totalDrops) {
-                         document.getElementById('dragDropFeedback').textContent = "All Three Freedoms Matched! Great work on Day 1!";
-                         document.getElementById('dragDropFeedback').classList.add('text-blue-600');
+                    if (correctDropsA3 === totalDropsA3) {
+                        document.getElementById('dragDropFeedback').textContent = "All Three Freedoms Matched! Great work!";
+                        document.getElementById('dragDropFeedback').classList.add('text-blue-600');
+                        completion.a3 = true;
+                        showFeedback('Activity 3 Complete!', 'bg-blue-500');
+                        checkOverallCompletion();
                     }
-
                 } else if (draggedRight !== acceptedRight) {
                     showFeedback('Wrong Match! Try again.', 'bg-red-500');
+                    completion.a3 = false; // Reset if they drop something wrong after completion (unlikely, but safe)
+                    checkOverallCompletion();
                 }
             });
         });
 
+        // --- Activity 4 Logic (Video Question) ---
+        function checkCompletionA4() {
+            const answer = document.getElementById('videoAnswer').value.trim();
+            if (answer.length > 5) {
+                if (!completion.a4) {
+                    completion.a4 = true;
+                    showFeedback('Activity 4 Complete!', 'bg-blue-500');
+                    checkOverallCompletion();
+                }
+            } else {
+                 completion.a4 = false;
+                 checkOverallCompletion();
+            }
+        }
+
+        // --- Activity 5 Logic (Drawing and Label) ---
+        let hasDrawn = false;
+        function checkCompletionA5() {
+            const label = document.getElementById('freedomLabel').value.trim();
+            if (label.length > 5 && hasDrawn) {
+                if (!completion.a5) {
+                    completion.a5 = true;
+                    showFeedback('Activity 5 Complete!', 'bg-blue-500');
+                    checkOverallCompletion();
+                }
+            } else {
+                 completion.a5 = false;
+                 checkOverallCompletion();
+            }
+        }
+        
+        // --- Drawing Canvas Logic ---
         const canvas = document.getElementById('drawingCanvas');
         const ctx = canvas.getContext('2d');
         const clearButton = document.getElementById('clearButton');
@@ -330,13 +539,23 @@
         let currentColor = penColorInput.value;
 
         function resizeCanvas() {
+            // Save the current drawing data before resizing
+            const dataUrl = canvas.toDataURL();
+            
             canvas.width = canvas.clientWidth;
             canvas.height = canvas.clientHeight;
+            
+            // Redraw the saved data after resizing
+            const img = new Image();
+            img.onload = function() {
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            };
+            img.src = dataUrl;
+            
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
         window.addEventListener('resize', resizeCanvas);
-        window.addEventListener('load', resizeCanvas);
 
         ctx.lineWidth = 5;
         ctx.lineJoin = 'round';
@@ -347,7 +566,10 @@
         });
 
         clearButton.addEventListener('click', () => {
+            ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
+            hasDrawn = false;
+            checkCompletionA5();
             showFeedback('Canvas Cleared!', 'bg-gray-500');
         });
 
@@ -382,6 +604,8 @@
             ctx.stroke();
 
             [lastX, lastY] = [pos.x, pos.y];
+            hasDrawn = true;
+            checkCompletionA5();
         }
 
         function startDrawing(e) {
@@ -404,103 +628,101 @@
         canvas.addEventListener('touchcancel', stopDrawing);
 
 
+        // --- Feedback Message Box ---
         const feedbackBox = document.getElementById('feedbackBox');
+        let feedbackTimeout;
 
         function showFeedback(message, bgColor) {
+            clearTimeout(feedbackTimeout);
             feedbackBox.textContent = message;
             feedbackBox.className = `feedback ${bgColor} text-white`;
             feedbackBox.style.display = 'block';
             
-            setTimeout(() => {
+            feedbackTimeout = setTimeout(() => {
                 feedbackBox.style.display = 'none';
-            }, 1500);
+            }, 2000);
         }
         
-        // --- TTS Functionality (Using Web Speech API) ---
-        const ttsButton = document.getElementById('ttsButton');
-        const readingTextDiv = document.getElementById('readingText');
-        const speakerIcon = document.getElementById('speakerIcon');
-        const loadingSpinner = document.getElementById('loadingSpinner');
-        
-        // Ensure that speech synthesis is supported
+        // --- Universal TTS Functionality (Web Speech API) ---
         const isSupported = 'speechSynthesis' in window;
-        if (!isSupported) {
-            ttsButton.disabled = true;
-            ttsButton.title = "TTS not supported by this browser.";
-        }
+        let ttsActive = false;
         
-        // Cancel speech if it's currently speaking and we click again
-        ttsButton.addEventListener('click', () => {
+        if (!isSupported) {
+            document.querySelectorAll('.tts-icon-button').forEach(btn => {
+                btn.disabled = true;
+                btn.title = "TTS not supported by this browser.";
+            });
+        }
+
+        function speakElementText(elementId) {
             if (!isSupported) return;
 
-            const ttsDirection = document.getElementById('ttsDirection');
-            if (ttsDirection) {
-                ttsDirection.classList.add('hidden');
-            }
-            
-            if (window.speechSynthesis.speaking) {
-                window.speechSynthesis.cancel();
-                resetTtsButton();
+            const element = document.getElementById(elementId);
+            let textToSpeak = "";
+
+            if (element) {
+                // If the element has a specific description or text node (like the reading block)
+                textToSpeak = element.innerText || element.textContent;
+            } else {
+                // Fallback for elements without an ID or if element isn't found
+                console.error(`TTS target element with ID '${elementId}' not found.`);
                 return;
             }
 
-            // Get all visible text content, cleaning up whitespace
-            const textToSpeak = readingTextDiv.innerText.trim().replace(/\s+/g, ' '); 
-            if (textToSpeak) {
-                speakText(textToSpeak);
+            // Clean up text
+            textToSpeak = textToSpeak.trim().replace(/\s+/g, ' ');
+
+            if (!textToSpeak) return;
+
+            if (window.speechSynthesis.speaking || ttsActive) {
+                window.speechSynthesis.cancel();
+                if (ttsActive) {
+                    // If speaking and clicked again, stop and reset. Don't restart.
+                    ttsActive = false;
+                    return;
+                }
             }
-        });
-        
-        function speakText(text) {
-            const utterance = new SpeechSynthesisUtterance(text);
+
+            const utterance = new SpeechSynthesisUtterance(textToSpeak);
             
-            // Set voice (optional, uses browser default if voice not found)
+            // Try to find a good English voice
             utterance.voice = window.speechSynthesis.getVoices().find(voice => voice.name.includes('Google') || voice.lang.startsWith('en'));
-            utterance.rate = 1.0; // Speed of speech
-            utterance.pitch = 1.0; // Pitch of speech
+            utterance.rate = 0.85; // Slightly slower rate for struggling readers
+            utterance.pitch = 1.0; 
 
             utterance.onstart = () => {
-                ttsButton.disabled = true;
-                speakerIcon.classList.add('hidden');
-                loadingSpinner.classList.remove('hidden');
+                ttsActive = true;
                 showFeedback('Reading aloud...', 'bg-indigo-500');
             };
 
             utterance.onend = () => {
-                resetTtsButton();
+                ttsActive = false;
             };
 
             utterance.onerror = (event) => {
                 console.error('[TTS DEBUG]: Speech Synthesis Error:', event.error);
                 showFeedback('Speech Error: ' + event.error, 'bg-red-500');
-                resetTtsButton();
+                ttsActive = false;
             };
 
             window.speechSynthesis.speak(utterance);
         }
         
-        function resetTtsButton() {
-            ttsButton.disabled = false;
-            speakerIcon.classList.remove('hidden');
-            loadingSpinner.classList.add('hidden');
-        }
+        window.speakElementText = speakElementText; // Expose to global scope for button clicks
+
+        // Initial setup on load
+        window.onload = function() {
+            resizeCanvas(); 
+            // Check initial completion state
+            checkCompletionA2();
+            checkCompletionA4();
+            checkCompletionA5();
+            checkOverallCompletion();
+        };
 
         // Must load voices asynchronously in some browsers
         window.speechSynthesis.onvoiceschanged = () => {
             // Voices are now loaded and available for use
-        };
-        
-        // Initial setup
-        window.onload = function() {
-            resizeCanvas(); 
-            const ttsDirection = document.getElementById('ttsDirection');
-            if (ttsDirection) {
-                ttsDirection.classList.remove('hidden'); 
-                // Hide the directional cue after 5 seconds to reduce clutter
-                setTimeout(() => {
-                    ttsDirection.classList.add('hidden');
-                }, 5000); 
-            }
         };
 
     </script>
