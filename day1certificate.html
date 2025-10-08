@@ -8,16 +8,6 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body {
-            font-family: 'Inter', sans-serif;<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Certificate of Completion</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        body {
             font-family: 'Inter', sans-serif;
             background-color: #eef2ff; /* Light blue background */
             display: flex;
@@ -94,7 +84,7 @@
         <button onclick="window.print()" class="px-6 py-3 bg-green-600 text-white font-bold rounded-lg shadow-md hover:bg-green-700 transition transform hover:scale-105">
             🖨️ Print or Save as PDF
         </button>
-        <!-- EDITED: Changed 'day1worksheet.html' to 'index.html' to match the actual worksheet file in the current context -->
+        <!-- Link goes back to the worksheet file, currently named index.html in the Canvas -->
         <a href="index.html" class="ml-4 px-6 py-3 bg-gray-500 text-white font-bold rounded-lg shadow-md hover:bg-gray-600 transition">
             Go Back
         </a>
@@ -107,132 +97,17 @@
             day: 'numeric'
         });
         
-        // Optional: Ask for name to personalize certificate
+        // This function now safely checks for a name stored in localStorage
         window.onload = function() {
             const studentNameElement = document.getElementById('studentName');
             const storedName = localStorage.getItem('studentName');
 
-            if (!storedName) {
-                // Use a non-blocking UI element instead of `prompt` for better user experience
-                // Since `prompt` is disallowed, we will default to 'A Great Student'
-                // and rely on the student updating it in the worksheet if needed.
-                
-                // For now, let's use a safe temporary solution:
-                const name = window.prompt("Please enter your name for the certificate:"); // Note: This will not work in a sandboxed iframe. Use a custom modal instead in a real app.
-                if (name && name.trim() !== "") {
-                    localStorage.setItem('studentName', name.trim());
-                    studentNameElement.textContent = name.trim();
-                }
-            } else {
+            if (storedName) {
+                // If a name was stored from the worksheet, use it.
                 studentNameElement.textContent = storedName;
             }
-        };
-
-    </script>
-</body>
-</html>
-
-            background-color: #eef2ff; /* Light blue background */
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-        .certificate-container {
-            width: 100%;
-            max-width: 800px;
-            min-height: 550px;
-            background: #ffffff;
-            border: 10px solid #f59e0b; /* Accent yellow border */
-            padding: 40px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-            border-radius: 20px;
-            position: relative;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-around;
-        }
-        /* Printable content only */
-        @media print {
-            body { background: none; }
-            .certificate-container { border: 10px solid #f59e0b; box-shadow: none; }
-            .no-print { display: none; }
-        }
-        .text-shadow {
-            text-shadow: 2px 2px 0px rgba(255, 255, 255, 0.7);
-        }
-    </style>
-</head>
-<body>
-
-    <div class="certificate-container">
-        <h1 class="text-6xl font-black text-yellow-600 mb-6 text-shadow">
-            CERTIFICATE OF FREEDOM
-        </h1>
-
-        <p class="text-xl text-gray-700 font-semibold mb-2">This certifies that</p>
-
-        <h2 id="studentName" class="text-5xl font-extrabold text-blue-700 mb-8 border-b-4 border-dashed border-gray-300 mx-auto w-3/4 pb-2">
-            A Great Student
-        </h2>
-
-        <p class="text-2xl text-gray-800 font-bold mb-10">
-            Has successfully completed Day 1: My Freedoms, <br>
-            demonstrating knowledge of **Natural Rights**
-            and the **Declaration of Independence**.
-        </p>
-
-        <div class="flex justify-around items-end w-full mt-auto">
-            <div class="flex flex-col items-center">
-                <p class="text-2xl mb-2" role="img" aria-label="Trophy">🏆</p>
-                <div class="border-t border-gray-500 pt-1 text-sm text-gray-600 font-medium">
-                    Date: <span id="currentDate"></span>
-                </div>
-            </div>
-            <div class="flex flex-col items-center">
-                <p class="text-2xl mb-2" role="img" aria-label="Star">⭐</p>
-                <div class="border-t border-gray-500 pt-1 text-sm text-gray-600 font-medium">
-                    Teacher Signature
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- Print/Download Button -->
-    <div class="no-print mt-6">
-        <button onclick="window.print()" class="px-6 py-3 bg-green-600 text-white font-bold rounded-lg shadow-md hover:bg-green-700 transition transform hover:scale-105">
-            🖨️ Print or Save as PDF
-        </button>
-        <a href="day1worksheet.html" class="ml-4 px-6 py-3 bg-gray-500 text-white font-bold rounded-lg shadow-md hover:bg-gray-600 transition">
-            Go Back
-        </a>
-    </div>
-
-    <script>
-        document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
-        
-        // Optional: Ask for name to personalize certificate
-        window.onload = function() {
-            const studentNameElement = document.getElementById('studentName');
-            const storedName = localStorage.getItem('studentName');
-
-            if (!storedName) {
-                const name = prompt("Please enter your name for the certificate:");
-                if (name && name.trim() !== "") {
-                    localStorage.setItem('studentName', name.trim());
-                    studentNameElement.textContent = name.trim();
-                }
-            } else {
-                studentNameElement.textContent = storedName;
-            }
+            // If no name is stored, it defaults to 'A Great Student' from the HTML, 
+            // which is much cleaner than using the disallowed window.prompt().
         };
 
     </script>
