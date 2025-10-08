@@ -36,7 +36,7 @@
         /* FIX 1: Adjust positioning and responsiveness to prevent overlap */
         #ttsDirection {
             right: 100%; 
-            margin-right: 2rem; /* Increased margin */
+            margin-right: 2rem; 
             font-size: 0.8rem;
             white-space: nowrap;
         }
@@ -56,7 +56,6 @@
                 <h2 class="text-2xl font-bold text-gray-800">Reading: The Declaration and My Freedoms</h2>
                 <div class="flex items-center space-x-2 relative">
                     <!-- ARROW & Directions -->
-                    <!-- FIX 1: Added hidden sm:block (or similar) to prevent overlap on small screens -->
                     <div id="ttsDirection" class="absolute top-1/2 transform -translate-y-1/2 p-2 bg-indigo-500 text-white text-xs font-semibold rounded-lg shadow-lg hidden md:block">
                         Click to Read Aloud!
                         <!-- Arrow pointing to the button -->
@@ -423,22 +422,31 @@
         const readingTextDiv = document.getElementById('readingText');
         const speakerIcon = document.getElementById('speakerIcon');
         const loadingSpinner = document.getElementById('loadingSpinner');
-        // const audioContext = new (window.AudioContext || window.webkitAudioContext)(); // Not strictly needed if using Audio object
 
         // Helper function to convert base64 to ArrayBuffer
         function base64ToArrayBuffer(base64) {
-            const binaryString = atob(base64);
-            const len = binaryString.length;
-            const bytes = new Uint8Array(len);
-            for (let i = 0; i < len; i++) {
-                bytes[i] = binaryString.charCodeAt(i);
+            try {
+                const binaryString = atob(base64);
+                const len = binaryString.length;
+                const bytes = new Uint8Array(len);
+                for (let i = 0; i < len; i++) {
+                    bytes[i] = binaryString.charCodeAt(i);
+                }
+                return bytes.buffer;
+            } catch (e) {
+                console.error("[TTS DEBUG]: base64ToArrayBuffer failed.", e);
+                return new ArrayBuffer(0);
             }
-            return bytes.buffer;
         }
 
         // Helper function to create WAV blob from PCM data (signed 16-bit PCM)
         function pcmToWav(pcm16, sampleRate) {
             try {
+                if (pcm16.length === 0) {
+                    console.error("[TTS DEBUG]: PCM data array is empty.");
+                    return null;
+                }
+
                 const buffer = new ArrayBuffer(44 + pcm16.length * 2);
                 const view = new DataView(buffer);
                 
@@ -475,10 +483,12 @@
                     view.setInt16(offset, pcm16[i], true);
                     offset += 2;
                 }
-
+                
+                console.log(`[TTS DEBUG]: WAV Header created successfully. Sample Rate: ${sampleRate}, Data Length: ${pcm16.length * 2} bytes.`);
                 return new Blob([buffer], { type: 'audio/wav' });
+
             } catch (e) {
-                console.error("Error creating WAV Blob:", e);
+                console.error("[TTS DEBUG]: Error creating WAV Blob:", e);
                 return null;
             }
         }
@@ -526,7 +536,7 @@
                     if (response.ok) break;
 
                 } catch (error) {
-                    console.error('Fetch error on retry attempt ' + i + ':', error);
+                    console.error('[TTS DEBUG]: Fetch error on retry attempt ' + i + ':', error);
                 }
 
                 if (i < maxRetries - 1) {
@@ -536,22 +546,44 @@
             }
 
             if (!response || !response.ok) {
-                console.error('API call failed after all retries. Status:', response ? response.status : 'No response');
-                showFeedback('Error: Could not generate speech.', 'bg-red-500');
+                console.error('[TTS DEBUG]: API call failed after all retries. Status:', response ? response.status : 'No response');
+                showFeedback('Error: Could not generate speech (API/Network failed).', 'bg-red-500');
                 resetTtsButton();
                 return;
             }
             
             try {
-                const result = await response.json();
+                // IMPORTANT: Read response body as text first in case it's an error message
+                const responseText = await response.text();
+                let result;
+
+                try {
+                    result = JSON.parse(responseText);
+                } catch (e) {
+                    console.error('[TTS DEBUG]: Failed to parse JSON response. Response Text:', responseText);
+                    showFeedback('Error: Invalid response from server.', 'bg-red-500');
+                    resetTtsButton();
+                    return;
+                }
+
                 const part = result?.candidates?.[0]?.content?.parts?.[0];
                 const audioData = part?.inlineData?.data;
                 const mimeType = part?.inlineData?.mimeType;
 
-                if (audioData && mimeType && mimeType.startsWith("audio/L16")) {
+                if (!audioData) {
+                    console.error('[TTS DEBUG]: No audio data found in response structure. Response:', result);
+                    showFeedback('Error: No audio data received.', 'bg-red-500');
+                    resetTtsButton();
+                    return;
+                }
+                
+                if (mimeType && mimeType.startsWith("audio/L16")) {
                     const sampleRateMatch = mimeType.match(/rate=(\d+)/);
-                    const sampleRate = sampleRateMatch ? parseInt(sampleRateMatch[1], 10) : 24000;
+                    // Use 24000 as a reliable default for the Kore voice
+                    const sampleRate = sampleRateMatch ? parseInt(sampleRateMatch[1], 10) : 24000; 
                     
+                    console.log(`[TTS DEBUG]: Audio data received. MimeType: ${mimeType}, Sample Rate detected: ${sampleRate}.`);
+
                     const pcmData = base64ToArrayBuffer(audioData);
                     const pcm16 = new Int16Array(pcmData);
                     
@@ -570,16 +602,16 @@
 
                         showFeedback('Reading aloud...', 'bg-indigo-500');
                     } else {
-                        throw new Error("WAV conversion failed.");
+                        throw new Error("WAV conversion failed (pcmToWav returned null).");
                     }
 
                 } else {
-                    console.error('Failed to get valid audio data from response:', result);
-                    showFeedback('Failed to process audio data.', 'bg-red-500');
+                    console.error('[TTS DEBUG]: Failed to get valid audio MIME type (Expected audio/L16). Received:', mimeType);
+                    showFeedback('Failed to process audio data format.', 'bg-red-500');
                 }
             } catch (e) {
-                console.error("Error during JSON parsing or audio playback:", e);
-                showFeedback('An unexpected error occurred.', 'bg-red-500');
+                console.error("[TTS DEBUG]: Critical Error during audio processing/playback:", e);
+                showFeedback('An unexpected error occurred during audio processing.', 'bg-red-500');
             }
             
             resetTtsButton();
@@ -611,6 +643,7 @@
             const ttsDirection = document.getElementById('ttsDirection');
             if (ttsDirection) {
                 ttsDirection.classList.remove('hidden'); 
+                // Hide the directional cue after 5 seconds to reduce clutter
                 setTimeout(() => {
                     ttsDirection.classList.add('hidden');
                 }, 5000); 
